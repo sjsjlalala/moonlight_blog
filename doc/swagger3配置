@@ -1,0 +1,6 @@
+swagger版本为3.0
+swagger3 访问网址 ：http://localhost:8080/swagger-ui/index.html
+
+网络教程
+springboot2.7.6配置swagger3 ：https://www.cnblogs.com/Subaru/p/16478402.html
+swagger3 开启权限验证：https://blog.csdn.net/m0_52038897/article/details/122953466?ops_request_misc=&request_id=&biz_id=102&utm_term=spring%20boot%20swagger3%E9%85%8D%E7%BD%AEtoken&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduweb~default-2-122953466.142

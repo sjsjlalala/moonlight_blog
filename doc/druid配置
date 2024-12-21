@@ -1,0 +1,6 @@
+坑：springSecurity依赖导致登录不上监控页面
+
+duid版本：1.2.18
+监控页面：http://localhost:8080/druid/datasource.html
+登录账号：druid
+登录密码：8022
