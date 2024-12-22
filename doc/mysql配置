@@ -1,0 +1,8 @@
+
+   docker run -d \
+     --name mysql_container \
+     -v /mydata/new/mysql/data:/var/lib/mysql \
+     -v /mydata/new/mysql/conf:/etc/mysql/conf.d \
+     -e MYSQL_ROOT_PASSWORD=your_root_password \
+     -p 3306:3306 \
+     mysql:8.0

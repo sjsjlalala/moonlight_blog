@@ -1,0 +1,15 @@
+拉取nacos，注意版本加v：docker pull nacos/nacos-server:v2.2.0
+
+运行容器： docker run -d      --name nacos      -p 8848:8848  -p 9848:9848   -p 9555:9555    -e MODE=standalone      --restart=always      -v /mydata/nacos/logs:/home/nacos/logs      -v /mydata/nacos/conf:/home/nacos/conf      nacos/nacos-server:v2.2.0
+
+教程：https://blog.csdn.net/ilvjiale/article/details/129417768
+
+
+对于警告：Ignore the empty nacos configuration and get it based on dataId[blog_admin] & group[dev]
+出现这个异常信息并没有太大问题，因为Spring Cloud在加载Nacos的配置文件时会轮训三个dataID：
+格式一：xxx_config
+
+格式二：xxx_config.yaml
+
+格式三：xxx_config-dev.yaml
+所以说，只要有一个配置文件的DataID符合上面的条件，其他的不符合，单纯打印出来警告日志也是没关系的。
