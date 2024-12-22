@@ -4,7 +4,7 @@
 
 教程：https://blog.csdn.net/ilvjiale/article/details/129417768
 
-
+问题1：
 对于警告：Ignore the empty nacos configuration and get it based on dataId[blog_admin] & group[dev]
 出现这个异常信息并没有太大问题，因为Spring Cloud在加载Nacos的配置文件时会轮训三个dataID：
 格式一：xxx_config
@@ -13,3 +13,11 @@
 
 格式三：xxx_config-dev.yaml
 所以说，只要有一个配置文件的DataID符合上面的条件，其他的不符合，单纯打印出来警告日志也是没关系的。
+
+问题2：报错can not get cluster name in registry config 'service.vgroupMapping.guangzhou', please make sure registry config correct
+解决：注意服务端和客户端中的namespace和group分组。要一致，否则找不到对应的配置文件
+
+问题3：报错no available service found in cluster ‘default’, please make sure registry config correct and keep your seata server running
+解决：nacos中心seata配置文件问题，配置不全，忘写鉴权信息也会报这个错, 检查一下用户名密码, 极具误导性, 不一定是名字配错了
+
+

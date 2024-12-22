@@ -2,9 +2,7 @@ server:
   port: 8080
 spring:
   application:
-    name: blog_admin
-  profiles:
-    active: dev
+    name: blog_gateway
   cloud:
     nacos:
       username: nacos

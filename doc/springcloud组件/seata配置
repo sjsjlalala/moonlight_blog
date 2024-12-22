@@ -1,0 +1,6 @@
+docker版本 1.6.1
+docker pull seataio/seata-server:1.6.1
+docker run --name seata -p 8091:8091 -p 7091:7091 -e SEATA_IP=192.168.123.222 -v /mydata/seata/conf:/seata-server/resources --privileged=true -d seataio/seata-server:1.6.1
+
+网络教程
+https://note.youdao.com/ynoteshare/index.html?id=d0a1e09668894e416639440391145a2e&type=note&_time=1734853814292
