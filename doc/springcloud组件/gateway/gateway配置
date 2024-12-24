@@ -1,0 +1,2 @@
+Spring MVC 和 Spring Cloud Gateway 都是基于 Spring 框架的项目，但它们的设计目标和适用场景不同。Spring MVC 主要用于构建传统的 Web 应用程序，而 Spring Cloud Gateway 是一个基于 Reactor 的非阻塞网关。两者在类路径中同时存在会导致冲突，因为它们使用了不同的 HTTP 处理机制
+Spring Cloud Gateway 内置了对 Project Reactor 的支持，特别是 Flux 和 Mono 类型。这些类型是 Reactor 库的核心部分，用于处理异步、非阻塞的数据流。

@@ -11,6 +11,8 @@
     <modules>
         <module>blog_admin</module>
         <module>blog_common</module>
+        <module>blog_gateway</module>
+        <module>blog_auth</module>
     </modules>
 
     <properties>
@@ -36,6 +38,7 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
 
     </dependencies>
 

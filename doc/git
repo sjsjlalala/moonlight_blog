@@ -1,0 +1,2 @@
+问题1：GitHub连接超时问题 Recv failure: Connection was reset
+解决：走代理https://blog.csdn.net/weixin_44223180/article/details/133059575

@@ -1,0 +1,12 @@
+https://blog.csdn.net/erik_tse/article/details/116652064
+
+要点1：
+
+  /**
+     * Swagger3默认的url后缀
+     */
+    public static final String SWAGGER2URL = "/v2/api-docs";
+
+ 要点2：请求路径不加上服务名
+ 重写框架中的包：springfox.documentation.oas.web
+ https://blog.csdn.net/weixin_43356507/article/details/115537098

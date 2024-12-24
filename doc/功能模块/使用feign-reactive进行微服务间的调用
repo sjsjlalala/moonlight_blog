@@ -1,0 +1,3 @@
+与open feign的调用几乎一样，不过feign-reactive是异步调用，gateway是响应式的，所以gateway中应使用feign-reactive进行调用
+https://blog.csdn.net/suyuaidan/article/details/137674204
+https://blog.csdn.net/Demon_Hao/article/details/136530115
