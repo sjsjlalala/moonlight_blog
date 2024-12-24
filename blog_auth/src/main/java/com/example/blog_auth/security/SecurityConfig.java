@@ -25,6 +25,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private MyUserDetailsService userDetailsService; // 自动注入用户详情服务
 
+
+
     /**
      * 配置用户认证管理器，使用自定义的用户详情服务和BCrypt密码加密器。
      *
