@@ -1,7 +1,15 @@
-package com.example.blog_common.vo;
+package org.example.base.response;
 
 import lombok.Data;
+import org.example.base.enums.ErrorCode;
 
+/*
+ * @description:
+ * @author: moki
+ * @date: 2024/12/25 11:46
+ * @param: 统一响应结果类
+ * @return:
+ **/
 @Data
 public class CommonResponse<T> {
     private Integer code;
@@ -26,5 +34,9 @@ public class CommonResponse<T> {
     // 静态方法简化构建失败响应
     public static CommonResponse<Void> failure(Integer code, String message) {
         return new CommonResponse<>(code, message, false, null);
+    }
+
+    public static  <T> CommonResponse<T> failure(Integer code, String message, T data) {
+        return new CommonResponse<>(code, message, false, data);
     }
 }

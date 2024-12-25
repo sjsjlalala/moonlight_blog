@@ -20,4 +20,4 @@
 问题3：报错no available service found in cluster ‘default’, please make sure registry config correct and keep your seata server running
 解决：nacos中心seata配置文件问题，配置不全，忘写鉴权信息也会报这个错, 检查一下用户名密码, 极具误导性, 不一定是名字配错了
 
-
+问题4：nacos服务名不支持_,有时会有bug，最好使用-。

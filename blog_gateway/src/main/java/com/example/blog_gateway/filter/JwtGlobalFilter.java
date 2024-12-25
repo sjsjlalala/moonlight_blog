@@ -2,13 +2,11 @@ package com.example.blog_gateway.filter;
 
 
 
-import com.example.blog_common.feign.AdminFeignClient;
 import com.example.blog_common.feign.AuthFeignClient;
-import com.example.blog_common.vo.CommonResponse;
-import com.example.blog_gateway.security.JwtUtil;
+
+import org.example.base.response.CommonResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
@@ -60,6 +58,7 @@ public class JwtGlobalFilter implements GlobalFilter, Ordered {
         String token = resolveToken(request);
 
         if (token != null ) {
+
             Mono<CommonResponse> commonResponseMono = authFeignClient.validateToken(token);
             if (Objects.requireNonNull(commonResponseMono.block()).getCode() == 200) {
                 logger.info("token校验通过");

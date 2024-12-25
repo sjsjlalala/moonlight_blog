@@ -6,10 +6,9 @@ import com.auth0.jwt.algorithms.Algorithm;  // JWT 算法
 import com.auth0.jwt.interfaces.DecodedJWT;  // 解码后的 JWT 接口
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.blog_common.entity.User;
-import com.example.blog_common.service.IUserService;
 import com.example.blog_common.service.impl.UserServiceImpl;
-import com.example.blog_common.vo.CommonResponse;
-import com.example.blog_common.vo.ErrorCode;
+import org.example.base.response.CommonResponse;
+import org.example.base.enums.ErrorCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;  // 用于注入配置属性
 import org.springframework.security.core.userdetails.UserDetails;  // 用户详情接口
@@ -40,7 +39,6 @@ public class JwtUtil {
         // 使用 JWT 创建者创建令牌
         return JWT.create()
                 .withSubject(userDetails.getUsername())  // 设置令牌的主题为用户名
-                .withExpiresAt(new Date(System.currentTimeMillis() + expirationTime))  // 设置令牌的过期时间
                 .sign(Algorithm.HMAC256(secretKey));  // 使用 HMAC256 算法和密钥签名令牌
     }
 
@@ -78,16 +76,7 @@ public class JwtUtil {
         return verifier.verify(token);  // 验证并解码 JWT 令牌
     }
 
-    /**
-     * 检查 JWT 令牌是否过期
-     *
-     * @param token JWT 令牌
-     * @return 如果令牌过期则返回 true，否则返回 false
-     */
-    public Boolean isTokenExpired(String token) {
-        Date expiration = extractExpiration(token);  // 提取令牌的过期时间
-        return expiration.before(new Date());  // 检查过期时间是否在当前时间之前
-    }
+
 
     /**
      * 验证 JWT 令牌
@@ -102,12 +91,11 @@ public class JwtUtil {
         if (user == null) {
             return CommonResponse.failure(ErrorCode.USER_NOT_FOUND.getCode(), ErrorCode.USER_NOT_FOUND.getMessage());
         }
+        // 用户被封禁
         if (user.getStatus() == 0) {
             return CommonResponse.failure(ErrorCode.USER_DISABLED.getCode(), ErrorCode.USER_DISABLED.getMessage());
         }
-        // token是否有效
-        if (isTokenExpired(token))
-            return CommonResponse.failure(ErrorCode.EXPIRED_TOKEN.getCode(), ErrorCode.EXPIRED_TOKEN.getMessage());
+
 
         return CommonResponse.success("验证通过");
     }

@@ -1,6 +1,7 @@
 package com.example.blog_auth.service;
 
 
+import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.blog_auth.model.Myuser;
 import com.example.blog_common.entity.User;
@@ -41,9 +42,11 @@ public class MyUserDetailsService implements UserDetailsService {
 
 
         if (user == null) {
-            throw new UsernameNotFoundException("User not found");
+            throw new UsernameNotFoundException("用户不存在");
         }
-
-        return new Myuser(user.getUsername(), user.getPassword(), Collections.EMPTY_LIST);
+        Myuser myuser = new Myuser(user.getUsername(), passwordEncoder.encode(user.getPassword()), Collections.EMPTY_LIST);
+        //转换对象
+        BeanUtil.copyProperties(user, myuser);
+        return myuser;
     }
 }

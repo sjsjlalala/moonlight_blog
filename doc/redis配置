@@ -1,0 +1,22 @@
+docker pull redis:latest
+
+## 创建目录
+mkdir -p /mydata/redis/conf
+mkdir -p /mydata/redis/data
+
+## 创建文件
+touch /mydata/redis/conf/redis.conf
+
+## 拷贝容器文件(无需，redis.conf文件是空的）
+docker cp redis:/etc/redis/redis.conf /mydata/redis/redis.conf
+
+
+docker run \
+--restart=always \
+--log-opt max-size=100m \
+--log-opt max-file=2 \
+-p 6379:6379 \
+--name redis \
+-v /mydata/redis/conf/redis.conf:/etc/redis/redis.conf  \
+-v /mydata/redis/data:/data \
+-d redis:latest

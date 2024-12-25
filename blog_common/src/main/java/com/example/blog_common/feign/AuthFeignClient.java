@@ -1,6 +1,7 @@
 package com.example.blog_common.feign;
 
-import com.example.blog_common.vo.CommonResponse;
+import org.example.base.response.CommonResponse;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -15,5 +16,8 @@ import reactor.core.publisher.Mono;
 @ReactiveFeignClient(name = "blog-auth", url = "http://localhost:8082")
 public interface AuthFeignClient {
     @RequestMapping(value = "/auth/validate", method = RequestMethod.GET)
-    Mono<CommonResponse> validateToken(@RequestParam String token);
+    Mono<CommonResponse> validateToken(@RequestParam("token") String token);
+
+    @RequestMapping(value = "/auth/logout", method = RequestMethod.POST)
+    Mono<CommonResponse> logout(@RequestHeader("Authorization") String token);
 }

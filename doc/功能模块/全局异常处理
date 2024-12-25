@@ -1,0 +1,4 @@
+https://blog.csdn.net/qq_42400763/article/details/107576029
+
+问题1：全局处理类捕获到了，但是前端显示的还是默认错误页面
+解决：异常处理类上要加@ResponseBody

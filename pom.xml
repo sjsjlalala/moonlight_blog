@@ -13,6 +13,7 @@
         <module>blog_common</module>
         <module>blog_gateway</module>
         <module>blog_auth</module>
+        <module>blog_base</module>
     </modules>
 
     <properties>
@@ -24,7 +25,11 @@
         <spring-boot.version>2.7.6</spring-boot.version>
         <spring-cloud-alibaba.version>2021.0.5.0</spring-cloud-alibaba.version>
         <spring-cloud.version>2021.0.5</spring-cloud.version>
-
+        <mybatis-plus-boot-starter.version>3.4.2</mybatis-plus-boot-starter.version>
+        <mysql-connector-java.version>8.0.30</mysql-connector-java.version>
+        <hutool-all.version>5.8.11</hutool-all.version>
+        <reactor.feign.version>3.2.6</reactor.feign.version>
+        <springfox-boot-starter.version>3.0.0</springfox-boot-starter.version>
     </properties>
 
     <dependencies>
