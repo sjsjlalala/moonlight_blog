@@ -1,8 +1,10 @@
 package com.example.blog_auth.model;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.example.blog_common.mybatisplus.UuidToBinaryTypeHandler;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -35,8 +37,9 @@ public class Myuser  extends User implements UserDetails{
 
     private static final long serialVersionUID = 1L;
 
-    @TableId(value = "user_id", type = IdType.AUTO)
-    private Integer userId;
+    @TableId(value = "uid", type = IdType.ASSIGN_UUID)
+    @TableField(typeHandler = UuidToBinaryTypeHandler.class)
+    private String uid;
 
     private String username;
 
@@ -66,7 +69,7 @@ public class Myuser  extends User implements UserDetails{
 
     @Override
     public String toString() {
-        return userId + "," + username + "," + password + "," + email + "," + phone + "," + type + "," + remarks + "," + status + "," + createTime;
+        return uid + "," + username + "," + password + "," + email + "," + phone + "," + type + "," + remarks + "," + status + "," + createTime;
     }
 
     public static Myuser fromString(String userString) {
@@ -74,7 +77,7 @@ public class Myuser  extends User implements UserDetails{
         Myuser user = new Myuser(parts[1], parts[2], Collections.EMPTY_LIST);
         user.setUsername(parts[1]);
         user.setPassword(parts[2]);
-        user.setUserId(Integer.parseInt(parts[0]));
+        user.setUid(parts[0]);
         user.setEmail(parts[3]);
         user.setPhone(parts[4]);
         user.setType(Integer.parseInt(parts[5]));

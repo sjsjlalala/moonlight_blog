@@ -20,6 +20,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,9 +49,11 @@ public class AuthController {
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword());
         // authenticate方法会调用loadUserByUsername
         try{
-            Authentication authenticate = authenticationManager.authenticate(usernamePasswordAuthenticationToken);
-        } catch (BadCredentialsException e) {
-            return CommonResponse.failure(ErrorCode.INVALID_CREDENTIALS.getCode(), ErrorCode.INVALID_CREDENTIALS.getMessage(), null);
+            authenticationManager.authenticate(usernamePasswordAuthenticationToken);
+        } catch (Exception e) {
+
+            System.out.println(Arrays.toString(e.getStackTrace()));
+            //return CommonResponse.failure(ErrorCode.INVALID_CREDENTIALS.getCode(), ErrorCode.INVALID_CREDENTIALS.getMessage(), null);
         }
 
         // 加载用户账号密码
