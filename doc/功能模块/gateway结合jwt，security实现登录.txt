@@ -1,0 +1,23 @@
+SpringCloud gateway+Spring Security + JWT实现登录和用户权限校验：https://blog.csdn.net/yuan__once/article/details/127022613
+
+AuthenticationManager 就是Spring Security用于执行身份验证的组件，只需要调用它的authenticate方法即可完成认证。而该方法时使用加密后的密码与数据库中的密码进行匹配
+所以我在security中使用bcrypt 算法对密码进行加密
+加密过程：密码验证流程
+     用户输入明文密码：
+     用户在登录界面输入他们的明文密码。
+     从数据库中获取加密密码：
+     系统从数据库中读取与该用户关联的加密密码（哈希值）。
+     提取盐值：
+     如果使用的是 bcrypt 等现代哈希算法，哈希值中已经包含了盐值信息。bcrypt 生成的哈希值格式如下：$2a$10$saltvalue$hashvalue
+
+     $2a$ 表示 bcrypt 算法。
+     10 表示成本因子（cost factor），即哈希迭代次数。
+     saltvalue 是 22 个字符的盐值。
+     hashvalue 是 31 个字符的哈希值。
+     使用相同的盐值对明文密码进行哈希处理：
+     系统使用从数据库中获取的哈希值中的盐值，对用户输入的明文密码进行相同的哈希处理。
+     例如，如果用户输入的明文密码是 password123，并且从数据库中获取的哈希值是 $2a$10$saltvalue$hashvalue，系统会使用 saltvalue 对 password123 进行哈希处理，生成一个新的哈希值。
+     比较两个哈希值：
+     将新生成的哈希值与从数据库中获取的哈希值进行比较。
+     如果两个哈希值匹配，则验证成功，用户可以登录。
+     如果两个哈希值不匹配，则验证失败，用户无法登录

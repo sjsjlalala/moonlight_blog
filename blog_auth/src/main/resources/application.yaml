@@ -1,0 +1,10 @@
+spring:
+  #swagger3 必须指定静态页面匹配方式
+  mvc:
+    path match:
+      matching-strategy: ant_path_matcher
+
+jwt:
+  secret: daf66e01593f61a15b857cf433aae03a005812b31234e149036bcc8dee755dbb
+  expiration-milliseconds: 604800000
+

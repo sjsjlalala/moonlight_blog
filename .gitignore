@@ -36,3 +36,30 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### vue 项目
+.DS_Store
+node_modules
+/dist
+
+
+# vue 项目local env files
+.env.local
+.env.*.local
+
+# vue 项目Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# vue 项目Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+package-lock.json
+yarn.lock

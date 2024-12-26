@@ -1,0 +1,9 @@
+spring:
+  profiles:
+    active: dev
+jwt:
+  secret: daf66e01593f61a15b857cf433aae03a005812b31234e149036bcc8dee755dbb
+  expiration-milliseconds: 604800000
+gateway:
+  whitelists: /blog-auth/v3/api-docs, /blog-admin/v3/api-docs, /blog-auth/auth/login
+
