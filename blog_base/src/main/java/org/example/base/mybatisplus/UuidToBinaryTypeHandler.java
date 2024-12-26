@@ -1,7 +1,8 @@
-package com.example.blog_common.mybatisplus;
+package org.example.base.mybatisplus;
 
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
+
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

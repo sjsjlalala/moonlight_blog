@@ -5,7 +5,6 @@ import com.auth0.jwt.JWTVerifier;    // JWT 验证器
 import com.auth0.jwt.algorithms.Algorithm;  // JWT 算法
 import com.auth0.jwt.interfaces.DecodedJWT;  // 解码后的 JWT 接口
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.example.blog_common.entity.User;
 import com.example.blog_common.service.impl.UserServiceImpl;
 import org.example.base.response.CommonResponse;
 import org.example.base.enums.ErrorCode;

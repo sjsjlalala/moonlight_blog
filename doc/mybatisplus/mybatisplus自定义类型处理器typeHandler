@@ -1,0 +1,3 @@
+Mybatis-Plus自定义TypeHandler将字符uuid和数据库中的binary类型的uid进行互转：https://baomidou.com/guides/type-handler/
+
+补充：如果需要全局typeHandler，那么在配置类或配置文件中配置即可

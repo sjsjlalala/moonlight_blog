@@ -5,15 +5,15 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.example.base.enums.EStatus;
+import org.example.base.mybatisplus.UuidToBinaryTypeHandler;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 /**
- * @Description
+ * @Description Entity基类
  * @Author LiuMaoJi
  * @Date 2024/12/25
  **/
@@ -27,6 +27,7 @@ public class BaseEntity<T extends Model<T>> extends Model<T> {
      * 唯一UID
      */
     @TableId(value = "uid", type = IdType.UUID)
+    @TableField(typeHandler = UuidToBinaryTypeHandler.class)
     private String uid;
 
     /**
@@ -40,8 +41,8 @@ public class BaseEntity<T extends Model<T>> extends Model<T> {
      */
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @TableField(fill = FieldFill.INSERT_UPDATE)
-    private Date createTime;
+    @TableField(fill = FieldFill.INSERT)
+    private LocalDate createTime;
 
     /**
      * 更新时间
@@ -49,12 +50,12 @@ public class BaseEntity<T extends Model<T>> extends Model<T> {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField(fill = FieldFill.INSERT_UPDATE)
-    private Date updateTime;
+    private LocalDate updateTime;
 
     public BaseEntity() {
         this.status = EStatus.ENABLE;
-        this.createTime = new Date();
-        this.updateTime = new Date();
+        this.createTime = LocalDate.now();
+        this.updateTime = LocalDate.now();
     }
 
 }
