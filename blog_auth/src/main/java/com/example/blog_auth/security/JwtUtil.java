@@ -1,19 +1,20 @@
 package com.example.blog_auth.security;
 
-import com.auth0.jwt.JWT;          // JWT 工具类
-import com.auth0.jwt.JWTVerifier;    // JWT 验证器
-import com.auth0.jwt.algorithms.Algorithm;  // JWT 算法
-import com.auth0.jwt.interfaces.DecodedJWT;  // 解码后的 JWT 接口
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.example.blog_common.entity.User;
 import com.example.blog_common.service.impl.UserServiceImpl;
-import org.example.base.response.CommonResponse;
 import org.example.base.enums.ErrorCode;
+import org.example.base.response.CommonResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;  // 用于注入配置属性
-import org.springframework.security.core.userdetails.UserDetails;  // 用户详情接口
-import org.springframework.stereotype.Component;  // 标记为 Spring 组件
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
 
-import java.util.Date;  // 日期类
+import java.util.Date;
 
 @Component
 public class JwtUtil {

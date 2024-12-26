@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.example.base.enums.EStatus;
 import org.example.base.mybatisplus.UuidToBinaryTypeHandler;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -17,6 +19,9 @@ import java.time.LocalDate;
  * @Author LiuMaoJi
  * @Date 2024/12/25
  **/
+
+@EqualsAndHashCode(callSuper = true)
+@Data
 public class BaseEntity<T extends Model<T>> extends Model<T> {
     /**
      *
