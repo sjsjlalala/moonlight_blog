@@ -16,6 +16,7 @@ public enum ErrorCode {
     USER_DISABLED(40301, "用户已被禁用,请联系管理员"),
     USER_ALREADY_EXISTS(40901, "用户已存在"),
     INVALID_CREDENTIALS(40101, "用户名或密码错误"),
+    Blog_ADD_FAILED(50001, "添加博客失败"),
     
     // JWT 相关错误
     INVALID_TOKEN(40102, "无效的令牌"),

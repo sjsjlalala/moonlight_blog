@@ -38,7 +38,7 @@ public class BaseEntity<T extends Model<T>> extends Model<T> {
     /**
      * 状态 0：失效  1：生效
      */
-    private int status;
+    private int status = 1;
 
     /**
      * @TableField 配置需要填充的字段

@@ -2,23 +2,36 @@ package org.example.base.vo;
 
 
 import lombok.Data;
-import org.example.base.validtor.group.Delete;
-import org.example.base.validtor.group.Update;
 
 /**
- * @description:
+ * @description: VO基类,主要用于支持分页
  * @author: moki
  * @date: 2024/12/25 16:31
- * @param: VO基类
- * @return: 
  **/
 @Data
-public class BaseVO<T> extends PageInfo<T> {
+public class BaseVO<T>  {
 
     /**
      * 唯一UID
      */
     private String uid;
 
-    private Integer status;
+    private Integer status ;
+
+    /**
+     * 关键字
+     */
+    private String keyword;
+
+    /**
+     * 当前页
+     */
+
+    private Long currentPage;
+
+    /**
+     * 页大小
+     */
+
+    private Long pageSize;
 }
