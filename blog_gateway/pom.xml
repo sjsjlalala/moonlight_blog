@@ -113,7 +113,7 @@
         </dependency>
         <dependency>
             <groupId>com.example</groupId>
-            <artifactId>blog_base</artifactId>
+            <artifactId>blog_core</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
             <exclusions>

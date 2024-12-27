@@ -13,7 +13,7 @@
         <module>blog_common</module>
         <module>blog_gateway</module>
         <module>blog_auth</module>
-        <module>blog_base</module>
+        <module>blog_core</module>
     </modules>
 
     <properties>

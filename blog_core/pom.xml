@@ -10,7 +10,7 @@
     </parent>
 
     <groupId>com.example</groupId>
-    <artifactId>blog_base</artifactId>
+    <artifactId>blog_core</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>blog_base</name>
     <description>blog_base</description>

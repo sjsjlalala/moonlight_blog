@@ -31,7 +31,7 @@ public class BaseEntity<T extends Model<T>> extends Model<T> {
     /**
      * 唯一UID
      */
-    @TableId(value = "uid", type = IdType.UUID)
+    @TableId(value = "uid", type = IdType.ASSIGN_UUID)
     @TableField(typeHandler = UuidToBinaryTypeHandler.class)
     private String uid;
 
