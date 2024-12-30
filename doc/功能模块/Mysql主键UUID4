@@ -3,6 +3,8 @@ Mybatis-Plus自定义TypeHandler将字符uuid和数据库中的binary类型的ui
 
 补充：如果需要全局typeHandler，那么在配置类或配置文件中配置即可
 
+补充: typehandler的转换，在mybatis主键生成策略之前，所以默认的主键生成策略，无法进行自定义类型转换，因此主动先填充mybatis主键(通过metaDataHandler)
+
 
 
 

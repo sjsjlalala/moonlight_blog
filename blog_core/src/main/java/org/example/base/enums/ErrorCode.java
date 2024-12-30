@@ -39,8 +39,14 @@ public enum ErrorCode {
     REQUEST_PARAMS_NOT_JSON(50010, "请求参数不是JSON格式"),
     REQUEST_PARAMS_NOT_XML(50011, "请求参数不是XML格式"),
     REQUEST_PARAMS_NOT_FORM(50012, "请求参数不是表单格式"),
-    REQUEST_PARAMS_NOT_MULTIPART(50013, "请求参数不是Multipart格式");
+    REQUEST_PARAMS_NOT_MULTIPART(50013, "请求参数不是Multipart格式"),
 
+    // 内部错误
+    INNER_GATEWAY_ERROR(50001, "内部网关错误,传入了空token"),
+    INNER_GATEWAY_TIMEOUT(50002, "内部网关超时"),
+    INNER_GATEWAY_SERVICE_UNAVAILABLE(50003, "内部网关服务不可用"),
+    INNER_GATEWAY_BAD_GATEWAY(50004, "内部网关错误"),
+    INNER_GATEWAY_NOT_FOUND(50005, "内部网关错误");
 
     private final int code;
     private final String message;

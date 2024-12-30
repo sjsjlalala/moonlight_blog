@@ -1,9 +1,7 @@
 package org.example.base.model;
 
 import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
@@ -31,8 +29,7 @@ public class BaseEntity<T extends Model<T>> extends Model<T> {
     /**
      * 唯一UID
      */
-    @TableId(value = "uid", type = IdType.ASSIGN_UUID)
-    @TableField(typeHandler = UuidToBinaryTypeHandler.class)
+    @TableField(typeHandler = UuidToBinaryTypeHandler.class, fill = FieldFill.INSERT)
     private String uid;
 
     /**

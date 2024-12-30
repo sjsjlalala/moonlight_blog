@@ -3,6 +3,7 @@ package com.example.blog_common.exceptionHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.example.base.enums.ErrorCode;
 import org.example.base.exception.customException.ApiInvalidParamException;
+import org.example.base.exception.customException.InnerGateWayException;
 import org.example.base.exception.customException.InsertException;
 import org.example.base.response.CommonResponse;
 import org.springframework.http.HttpStatus;
@@ -42,6 +43,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<String> handleGlobalException(Exception ex) {
+        log.error("Exception caught", ex);
         return new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    @ExceptionHandler(InnerGateWayException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public CommonResponse<Throwable> In(InnerGateWayException ex) {
+        return CommonResponse.failure(ex.getCode(), ex.getMessage(), ex.getCause());
     }
 }

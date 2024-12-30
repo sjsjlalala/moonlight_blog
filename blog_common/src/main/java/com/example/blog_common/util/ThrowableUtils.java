@@ -1,12 +1,15 @@
-package org.example.base.exception.handler;
+package com.example.blog_common.util;
 
 import cn.hutool.core.collection.CollectionUtil;
 import org.example.base.constants.Constants;
+import org.example.base.enums.ErrorCode;
 import org.example.base.exception.customException.ApiInvalidParamException;
+import org.example.base.exception.customException.InnerGateWayException;
 import org.example.base.exception.customException.InsertException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Objects;
 
@@ -52,5 +55,13 @@ public class ThrowableUtils {
             }
             throw new ApiInvalidParamException(sb.toString());
         }
+    }
+
+    public static String checkToken(HttpServletRequest request) {
+        String token = TokenUtil.resolveToken(request);
+        if (token == null || token.isEmpty()) {
+            throw new InnerGateWayException(ErrorCode.INNER_GATEWAY_ERROR.getMessage() + "异常请求路径： " + request.getRequestURI());
+        }
+        return token;
     }
 }

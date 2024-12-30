@@ -2,6 +2,8 @@ package org.example.base.mybatisplus;
 
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
+import org.apache.ibatis.type.MappedJdbcTypes;
+import org.apache.ibatis.type.MappedTypes;
 
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
@@ -14,6 +16,8 @@ import java.util.UUID;
  * @author: moki
  * @date: 2024/12/25 22:19
  */
+@MappedTypes({String.class})
+@MappedJdbcTypes(JdbcType.BINARY)
 public class UuidToBinaryTypeHandler extends BaseTypeHandler<String> {
 
     /**

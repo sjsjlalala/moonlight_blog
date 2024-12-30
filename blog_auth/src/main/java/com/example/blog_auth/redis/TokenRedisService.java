@@ -21,7 +21,7 @@ public class TokenRedisService {
 
     private static final String TOKEN_PREFIX = "token:";
     private static final String USER_PREFIX = "user:";
-    private static final Long TOKEN_EXPIRATION = 30L; // 令牌过期时间，单位分钟
+    private static final Long TOKEN_EXPIRATION = 315360000L; // 令牌过期时间，单位分钟
 
     public void saveToken(String token, String username) {
         redisTemplate.opsForValue().set(TOKEN_PREFIX + token, username, TOKEN_EXPIRATION, TimeUnit.MINUTES);

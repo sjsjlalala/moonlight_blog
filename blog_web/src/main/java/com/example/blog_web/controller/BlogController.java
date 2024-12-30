@@ -4,7 +4,7 @@ package com.example.blog_web.controller;
 import com.example.blog_common.service.impl.BlogServiceImpl;
 import com.example.blog_common.vo.BlogVO;
 import io.swagger.annotations.ApiOperation;
-import org.example.base.exception.handler.ThrowableUtils;
+import com.example.blog_common.util.ThrowableUtils;
 import org.example.base.response.CommonResponse;
 import org.example.base.validtor.group.Insert;
 import org.springframework.beans.factory.annotation.Autowired;

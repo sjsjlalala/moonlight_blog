@@ -1,9 +1,9 @@
 package org.example.base.mybatisplus;
 
+import cn.hutool.core.lang.UUID;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.reflection.MetaObject;
-import org.springframework.stereotype.Component;
 
 import java.util.Date;
 /**
@@ -16,6 +16,12 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
 
     @Override
     public void insertFill(MetaObject metaObject) {
+        // 生成并设置主键
+        String generatedUid = UUID.randomUUID().toString();
+        this.strictInsertFill(metaObject, "uid", String.class, generatedUid);
+
+        // 捕获生成的主键
+        System.out.println("Generated UID: " + generatedUid);
         this.strictInsertFill(metaObject, "createTime", Date.class, new Date());
         this.strictInsertFill(metaObject, "updateTime", Date.class, new Date());
     }
@@ -24,4 +30,5 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
     public void updateFill(MetaObject metaObject) {
         this.strictUpdateFill(metaObject, "updateTime", Date.class, new Date());
     }
+
 }

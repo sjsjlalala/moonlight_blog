@@ -1,0 +1,15 @@
+spring:
+  profiles:
+    active: dev
+
+file:
+  image:
+    uploadPath: C:/Users/27038/Desktop/GraduationProject/uploadFiles/
+    uploadDir: images/
+    localUrl: http://localhost:8084/
+    visualMappingPath: upload-files/ # 虚拟url路径
+    visualMappingPathPattern: /upload-files/** # 虚拟url路径pattern
+logging:
+  level:
+    com.baomidou.mybatisplus: DEBUG
+    org.apache.ibatis: DEBUG

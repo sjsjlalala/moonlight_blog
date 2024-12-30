@@ -5,11 +5,9 @@ import org.example.base.enums.ErrorCode;
 import java.io.Serializable;
 
 /**
- * @description:
+ * @description: 自定义插入异常
  * @author: moki
  * @date: 2024/12/25 17:31
- * @param: 自定义插入异常
- * @return:
  **/
 public class InsertException extends RuntimeException implements Serializable {
 

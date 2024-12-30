@@ -1,0 +1,25 @@
+server:
+  port: 8084
+spring:
+  application:
+    name: blog-file
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      username: nacos
+      password: nacos
+
+      discovery:
+        server-addr: 192.168.123.222:8848
+        namespace: dev
+      config:
+        server-addr: 192.168.123.222:8848
+        #文件后缀
+        file-extension: yaml
+        #指定分组
+        group: dev
+        #指定命名空间
+        namespace: dev
+
+

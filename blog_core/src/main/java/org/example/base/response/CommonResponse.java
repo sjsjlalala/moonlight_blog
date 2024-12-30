@@ -3,12 +3,10 @@ package org.example.base.response;
 import lombok.Data;
 import org.example.base.enums.ErrorCode;
 
-/*
- * @description:
+/**
+ * @description: 统一响应结果类
  * @author: moki
- * @date: 2024/12/25 11:46
- * @param: 统一响应结果类
- * @return:
+ * @date: 2024/12/28 16:52
  **/
 @Data
 public class CommonResponse<T> {

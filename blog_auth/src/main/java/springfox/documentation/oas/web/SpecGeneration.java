@@ -17,11 +17,10 @@ import java.nio.charset.StandardCharsets;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
- * 尝试用该类替换框架中的类
- *
- * @author vains
- * @date 2021/4/6 11:21
- */
+ * @description: 替换swagger框架的类，将服务名添加到路径上
+ * @author: moki
+ * @date: 2024/12/28 14:51
+ **/
 @Slf4j
 public class SpecGeneration {
 

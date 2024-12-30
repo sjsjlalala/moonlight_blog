@@ -3,8 +3,7 @@ package org.example.base.exception.customException;
  * @description: api接口参数校验异常
  * @author: moki
  * @date: 2024/12/25 18:58
- * @param:
- * @return:
+
  **/
 public class ApiInvalidParamException extends RuntimeException {
     private static final long serialVersionUID = 1L;

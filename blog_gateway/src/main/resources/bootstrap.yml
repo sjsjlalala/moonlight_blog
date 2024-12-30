@@ -54,10 +54,18 @@ spring:
             - Path=/blog-auth/**
           filters:
             - StripPrefix=1
+
         - id: blog-web
           uri: lb:://blog-web
           predicates:
             - Path=/blog-web/**
+          filters:
+            - StripPrefix=1
+
+        - id: blog-file
+          uri: lb:://blog-file
+          predicates:
+            - Path=/blog-file/**
           filters:
             - StripPrefix=1
 
