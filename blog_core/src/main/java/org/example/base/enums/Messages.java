@@ -35,5 +35,12 @@ public interface Messages {
     String FILE_SIZE_TOO_LARGE = "文件大小超出限制: 不超过10MB";
 
     String FILE_TYPE_ERROR = "图片格式不支持";
+
+    /**
+     *  文件操作消息
+     */
+    String FILE_DELETE_SUCCESS = "文件删除成功";
+    String FILE_DELETE_FAIL = "文件删除失败";
+    String ADD_BLOG_SUCCESS = "博客添加成功";
 }
 

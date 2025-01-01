@@ -10,6 +10,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -63,5 +64,14 @@ public class ThrowableUtils {
             throw new InnerGateWayException(ErrorCode.INNER_GATEWAY_ERROR.getMessage() + "异常请求路径： " + request.getRequestURI());
         }
         return token;
+    }
+
+    /**
+     * API接口请求参数校验,校验容器
+     */
+    public static void checkList(Collection<String> uuids) {
+        if (CollectionUtil.isEmpty(uuids)) {
+            throw new ApiInvalidParamException("请选择要删除的数据");
+        }
     }
 }

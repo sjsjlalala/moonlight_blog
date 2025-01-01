@@ -25,6 +25,7 @@ public class ImageResponse {
         private String url; // 图片 src，必须
         private String alt; // 图片描述文字，非必须
         private String href; // 图片的链接，非必须
+        private String uid; // 图片的 uid，非必须
 
         // Getter 和 Setter 方法
         public String getUrl() {
@@ -50,13 +51,21 @@ public class ImageResponse {
         public void setHref(String href) {
             this.href = href;
         }
+
+        public String getUid() {
+            return uid;
+        }
+
+        public void setUid(String uid) {
+            this.uid = uid;
+        }
     }
-    public static ImageResponse success(String url, String alt, String href) {
+    public static ImageResponse success(String url, String alt, String href,String uid) {
         Data data = new Data();
         data.url = url;
         data.alt = alt;
         data.href = href;
-
+        data.uid = uid;
         return new ImageResponse(0, data, Messages.FILE_UPLOAD_SUCCESS);
     }
     public static ImageResponse failure() {

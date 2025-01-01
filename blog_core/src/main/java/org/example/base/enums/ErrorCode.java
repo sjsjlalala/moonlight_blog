@@ -46,7 +46,10 @@ public enum ErrorCode {
     INNER_GATEWAY_TIMEOUT(50002, "内部网关超时"),
     INNER_GATEWAY_SERVICE_UNAVAILABLE(50003, "内部网关服务不可用"),
     INNER_GATEWAY_BAD_GATEWAY(50004, "内部网关错误"),
-    INNER_GATEWAY_NOT_FOUND(50005, "内部网关错误");
+    INNER_GATEWAY_NOT_FOUND(50005, "内部网关错误"),
+
+    // 文件错误
+    FILE_DELETE_FAILED(50006, "文件删除失败");
 
     private final int code;
     private final String message;

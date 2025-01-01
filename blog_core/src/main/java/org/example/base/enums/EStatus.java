@@ -24,4 +24,13 @@ public class EStatus {
      * 置顶的
      */
     public static final int STICK = 3;
+    /**
+     * 有效的
+     */
+    public static final int VALID = 1;
+    /**
+     * 无效的
+     **/
+    public static final int INVALID = 0;
+
 }

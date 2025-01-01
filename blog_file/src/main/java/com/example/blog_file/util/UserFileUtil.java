@@ -46,12 +46,13 @@ public class UserFileUtil {
         log.info("文件夹创建成功！路径：{}", uploadPath);
     }
 
-    public static void saveImageFile(byte[] bytes, String uploadPath, String fileName) {
+    public static File saveImageFile(byte[] bytes, String uploadPath, String fileName) {
         File file = FileUtil.writeBytes(bytes, uploadPath+ "/" + fileName);
         if (!file.exists()) {
             throw new RuntimeException("文件保存失败！");
         }
         log.info("文件保存成功！");
+        return file;
     }
     /**
      * @description: 生成本地的图片路径，供前端访问
@@ -63,5 +64,21 @@ public class UserFileUtil {
 
     public static String generateLocalUrl(String localUrl, String uploadDir, String visualMappingPath, String userDir, String fileName) {
         return localUrl + visualMappingPath + uploadDir + userDir + "/" +fileName;
+    }
+
+    public static void deleteFile(File unDofile) {
+        if (unDofile.exists()) {
+            if (unDofile.delete()) {
+                log.info("文件删除成功！");
+            } else {
+                log.error("文件删除失败！");
+            }
+        } else {
+            log.info("文件不存在！");
+        }
+    }
+    public static void deleteFile(String filePath) {
+        File file = new File(filePath);
+        deleteFile(file);
     }
 }

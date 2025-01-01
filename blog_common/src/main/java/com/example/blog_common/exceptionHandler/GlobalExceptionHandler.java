@@ -7,7 +7,6 @@ import org.example.base.exception.customException.InnerGateWayException;
 import org.example.base.exception.customException.InsertException;
 import org.example.base.response.CommonResponse;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -42,9 +41,9 @@ public class GlobalExceptionHandler {
     }
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ResponseEntity<String> handleGlobalException(Exception ex) {
+    public CommonResponse<Throwable> handleGlobalException(Exception ex) {
         log.error("Exception caught", ex);
-        return new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
+        return CommonResponse.failure(HttpStatus.INTERNAL_SERVER_ERROR.ordinal(), ex.getMessage(), ex.getCause());
     }
     @ExceptionHandler(InnerGateWayException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

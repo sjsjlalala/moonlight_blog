@@ -10,7 +10,7 @@ import springfox.documentation.oas.annotations.EnableOpenApi;
 
 
 @SpringBootApplication(scanBasePackages = {"com.example.blog_web","com.example.blog_common"})
-@MapperScan({"com.example.blog_web","com.example.blog_common"})
+@MapperScan({"com.example.blog_web.mapper","com.example.blog_common"})
 @EnableDiscoveryClient
 @RefreshScope
 @EnableOpenApi
