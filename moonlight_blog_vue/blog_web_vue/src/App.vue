@@ -1,12 +1,13 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
 
 import ArticleEditor from './components/blog/ArticleEditor.vue'
+import Home from './views/Home.vue'
+
 </script>
 
 <template>
     <div id = "app1">
-     <ArticleEditor/>
+     <Home/>
     </div>
 
 </template>

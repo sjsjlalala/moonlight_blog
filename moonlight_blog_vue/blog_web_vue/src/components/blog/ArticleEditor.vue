@@ -95,13 +95,14 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
+import {fetchTagsOptionsApi, fetchUserCategoriesApi, submitBlogApi} from '../../api/blogApi'
 import '@wangeditor/editor/dist/css/style.css'; // 引入 css
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue';
 import { editorRef, toolbarConfig, editorConfig, mode, handleCreated,imgUidList } from '../../../config/wangEditorConfig';
 import axios from 'axios';
 import { ElMessage, genFileId } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
-import {service} from '../../utils/request'
+
 
 
 // 博客对象
@@ -131,84 +132,71 @@ const categoryOptions = ref([]);
 // 标签级联选择器属性
 const props = {
   multiple: true,
-  checkStrictly: true
+  checkStrictly: false
 };
 // 分组级联选择器属性
 const categoryProps = {
-  checkStrictly: true
+  checkStrictly: false
 };
 
 const successMessage = ref('');
 const errorMessage = ref('');
 
 
+const validateBlogData = () => {
+  if (!blogData.value.title) {
+    throw new Error('请填写标题');
+  }
+  if (!blogData.value.content) {
+    throw new Error('请填写内容');
+  }
+  if (!blogData.value.tags) {
+    throw new Error('请选择标签');
+  }
+  if (!blogData.value.category) {
+    throw new Error('请选择分组');
+  }
+  if (!blogData.value.isOriginal && !blogData.value.originalUrl) {
+    throw new Error('请填写转载链接');
+  }
+};
+
 const publishBlog = async () => {
   try {
-    // 验证逻辑
-    if (!blogData.value.title) {
-      ElMessage({
-        showClose: true,
-        message: '请填写标题',
-        type: 'error',
-      })
-      throw new Error('请填写标题');
-    }
-    if (!blogData.value.content) {
-      ElMessage({
-        showClose: true,
-        message: '请填写内容',
-        type: 'error',
-      })
-      throw new Error('请填写内容');
-    }
-    if (!blogData.value.tags) {
-      ElMessage({
-        showClose: true,
-        message: '请选择标签',
-        type: 'error',
-      })
-      throw new Error('请选择标签');
-    }
-    if (!blogData.value.category) {
-      ElMessage({
-        showClose: true,
-        message: '请选择分组',
-        type: 'error',
-      })
-      throw new Error('请选择分组');
-    }
-    if (!blogData.value.isOriginal && !blogData.value.originalUrl) {
-      ElMessage({
-        showClose: true,
-        message: '请填写转载链接',
-        type: 'error',
-      })
-      throw new Error('请填写转载链接');
-    }
+    validateBlogData();
+    await submitBlog(); // 修正了这里缺少 await 的问题
 
+    ElMessage({
+      showClose: true,
+      message: 博客发布成功,
+      type: 'success',
+    });
 
-    submitBlog(),
-
-
-      successMessage.value = '博客发布成功！';
-    errorMessage.value = '';
     // 清空输入字段
     blogData.value.title = '';
     blogData.value.content = '';
     blogData.value.coverImageUid = null;
-    blogData.value.tags = '';
+    blogData.value.tags = null;
     blogData.value.isOriginal = true;
     blogData.value.originalUrl = '';
+    blogData.value.category = null;
+    blogData.value.coverImageUid = '';
+    blogData.value.introduction = '';
   } catch (error) {
-    errorMessage.value = error.message;
-    successMessage.value = '';
+    ElMessage({
+      showClose: true,
+      message: error.message,
+      type: 'error',
+    });
+   
   }
+  
 };
 
 // 获取标签列表
 const fetchOptions = async () => {
   try {
-    const response = await service.get('/blog-web/tag/getTags'); // 假设后端 API 地址为 /api/tags
+    const response = await fetchTagsOptionsApi(); // 假设后端 API 地址为 /api/tags
     console.log('标签列表:', response.data);
     options.value = response.data;
   } catch (error) {
@@ -218,7 +206,7 @@ const fetchOptions = async () => {
 // 获取用户分组
 const fetchCategories = async () => {
   try {
-    const response = await service.get('/blog-web/category/getUserCategories'); // 假设后端 API 地址为 /api/tags
+    const response = await fetchUserCategoriesApi();
     categoryOptions.value = response.data;
   } catch (error) {
     console.error('获取用户分组数据失败:', error);
@@ -248,11 +236,6 @@ const handleExceed = (files) => {
   }
 }
 
-// const handleChange = (file, fileList) => {
-//   if (fileList.length > 0 || file != null) {
-//     upload.value.submit()
-//   }
-// }
 
 const handleSuccess = (response, file, fileList) => {
   console.log('上传成功:', response)
@@ -292,7 +275,6 @@ const customUploadRequest = (options) => {
 
 const submitBlog = async () => {
   
-
   // 获取要删除的图片的 UUID
   //1.封面
   const filesToDelete = uploadedFiles.value.filter(f => f.uuid !== blogData.value.coverImageUid);
@@ -309,7 +291,7 @@ const submitBlog = async () => {
 
   // 发送封面图片 UUID 和要删除的图片 UUID 到后端
   try {
-    const response = await service.post('/blog-web/blog/add', requestData);
+    const response = await submitBlogApi(requestData);
     console.log(response.data);
 
     if (response.ok) {
