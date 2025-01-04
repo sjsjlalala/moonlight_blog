@@ -18,4 +18,10 @@ import java.util.ArrayList;
 public interface FileFeignClient {
     @RequestMapping(value = "/file/deleteFile", method = RequestMethod.POST)
     Mono<CommonResponse> deleteFile(@RequestParam("uuids") ArrayList<String> uuids);
+
+    @RequestMapping(value = "/fetchFile/fileDetail", method = RequestMethod.GET)
+    Mono<CommonResponse> getFileDetailById(@RequestParam("uid") String uid);
+
+    @RequestMapping(value = "/fetchFile/fileUrlById", method = RequestMethod.GET)
+    Mono<CommonResponse> getFileUrlById(@RequestParam("uid") String uid);
 }

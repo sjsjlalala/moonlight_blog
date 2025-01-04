@@ -1,5 +1,6 @@
 package com.example.blog_file.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.blog_common.entity.User;
 import com.example.blog_file.context.UserContext;
@@ -72,6 +73,8 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFile> i
                 }
                 // 将图片文件保存本地
                 temp = UserFileUtil.saveImageFile(bytes, uploadPath, fileName);
+                // 生成本地的url
+                fileUrl = UserFileUtil.generateLocalUrl(localUrl,uploadDir, visualMappingPath, userDir, fileName);
 
                 // 将文件元数据保存到数据库
                 userFile.setAdminUid(userinfo.getUid());
@@ -80,12 +83,11 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFile> i
                 userFile.setFileName(fileName);
                 userFile.setFileSize(file.getSize());
                 userFile.setFileType(file.getContentType());
-                userFile.setFileUrl(uploadPath + fileName);
+                userFile.setFileUrl(fileUrl);
                 if (!this.save(userFile)) {
                     return ImageResponse.failure("文件保存至数据库失败！");
                 }
-                // 生成本地的url
-                fileUrl = UserFileUtil.generateLocalUrl(localUrl,uploadDir, visualMappingPath, userDir, fileName);
+
             } catch (Exception e) {
                 // 回退所有操作(主要是删除本地图片,数据库已经自动回滚)
                 this.rollbackFiles(temp);
@@ -130,5 +132,36 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFile> i
         }
 
         return CommonResponse.success(Messages.FILE_DELETE_SUCCESS);
+    }
+    /**
+     * @description: 根据uid获取图片详情
+     * @author: moki
+     * @date: 2025/1/3 18:52
+     * @param: [uid]
+     * @return: org.example.base.response.CommonResponse<com.example.blog_file.entity.UserFile>
+     **/
+    @Override
+    public CommonResponse<UserFile> getFileDetailById(String uid) {
+        UserFile userFile = userFileMapper.selectById(UUIDUtil.uuidToBytes(uid));
+        if (userFile == null) {
+            log.error("文件不存在！");
+            throw new RuntimeException("文件不存在！");
+        }
+        return CommonResponse.success(userFile);
+    }
+    /**
+     * @description: 根据uid获取图片url
+     * @author: moki
+     * @date: 2025/1/3 19:01
+     * @param: [uid]
+     * @return: org.example.base.response.CommonResponse<java.lang.String>
+     **/
+    @Override
+    public CommonResponse<String> getFileUrlById(String uid) {
+        UserFile userFile = userFileMapper.selectOne(new LambdaQueryWrapper<UserFile>().eq(UserFile::getUid, UUIDUtil.uuidToBytes(uid)));
+        if (userFile != null) {
+            return CommonResponse.success(userFile.getFileUrl());
+        }
+        return CommonResponse.failure(ErrorCode.FILE_NOT_FOUND.getCode(), ErrorCode.FILE_NOT_FOUND.getMessage(), null);
     }
 }

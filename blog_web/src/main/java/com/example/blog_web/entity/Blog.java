@@ -27,6 +27,7 @@ public class Blog extends BaseEntity<Blog> {
 
 
     @ApiModelProperty(value = "作者uid")
+    @TableField(typeHandler = UuidToBinaryTypeHandler.class)
     private String authorUid;
 
     @ApiModelProperty(value = "简介")

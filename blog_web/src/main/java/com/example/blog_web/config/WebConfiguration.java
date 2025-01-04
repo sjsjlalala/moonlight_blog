@@ -17,7 +17,7 @@ public class WebConfiguration implements WebMvcConfigurer {
                 // 拦截的请求
                 .addPathPatterns("/**")
                 // 排除swagger3路径
-                .excludePathPatterns();
+                .excludePathPatterns("/blog/blogList");
 
     }
 

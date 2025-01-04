@@ -16,7 +16,7 @@ public class BaseVO<T>  {
      */
     private String uid;
 
-    private Integer status ;
+    private Integer status = 1 ;
 
     /**
      * 关键字

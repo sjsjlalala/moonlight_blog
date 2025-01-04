@@ -22,4 +22,8 @@ public interface IUserFileService extends IService<UserFile> {
 
 
     CommonResponse<String> deleteFile(List<String> uuids);
+
+    CommonResponse<UserFile> getFileDetailById(String uid);
+
+    CommonResponse<String> getFileUrlById(String uid);
 }

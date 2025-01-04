@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.example.base.vo.BaseVO;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -45,13 +46,13 @@ public class BlogVO extends BaseVO<BlogVO> {
     private String adminUid;
 
 
-    private Integer clicks;
+    private Integer clicks = 1;
 
 
-    private Integer likes;
+    private Integer likes = 0;
 
 
-    private Integer favorites;
+    private Integer favorites = 0;
 
 
     private String visibilityScope;
@@ -60,8 +61,9 @@ public class BlogVO extends BaseVO<BlogVO> {
 
     private boolean commentsAllowed ;
 
+    private LocalDate createTime;
 
-    private List<List<String>> tags;
+    private List<String> tags;
 
     private List<String> category;
 }

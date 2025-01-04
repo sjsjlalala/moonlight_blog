@@ -20,4 +20,5 @@ public interface AuthFeignClient {
 
     @RequestMapping(value = "/auth/logout", method = RequestMethod.POST)
     Mono<CommonResponse> logout(@RequestHeader("Authorization") String token);
+
 }

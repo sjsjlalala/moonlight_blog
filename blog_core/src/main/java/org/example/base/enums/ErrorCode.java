@@ -49,7 +49,8 @@ public enum ErrorCode {
     INNER_GATEWAY_NOT_FOUND(50005, "内部网关错误"),
 
     // 文件错误
-    FILE_DELETE_FAILED(50006, "文件删除失败");
+    FILE_DELETE_FAILED(50006, "文件删除失败"),
+    FILE_NOT_FOUND(50007, "文件不存在" );
 
     private final int code;
     private final String message;

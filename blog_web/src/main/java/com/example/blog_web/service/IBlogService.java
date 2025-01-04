@@ -1,9 +1,12 @@
 package com.example.blog_web.service;
 
-import com.example.blog_web.entity.Blog;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.example.blog_web.entity.Blog;
+import com.example.blog_web.vo.BlogDetailVO;
 import com.example.blog_web.vo.BlogRequestVO;
 import org.example.base.response.CommonResponse;
+
+import java.util.List;
 
 /**
  * <p>
@@ -16,4 +19,6 @@ import org.example.base.response.CommonResponse;
 public interface IBlogService extends IService<Blog> {
 
     CommonResponse addBlog(BlogRequestVO request);
+
+    CommonResponse<List<BlogDetailVO>> blogList();
 }

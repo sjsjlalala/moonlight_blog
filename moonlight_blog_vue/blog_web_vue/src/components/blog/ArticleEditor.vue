@@ -1,8 +1,7 @@
 <template>
   <div class="blog-publish">
-    <h1>发表博客</h1>
     <div class="form-group">
-      <Toolbar style="border-bottom: 1px solid #ccc" :editor="editorRef" :defaultConfig="toolbarConfig" :mode="mode" />
+      <Toolbar style="border-bottom: 1px solid #ccc" :editor="editorRef" :defaultConfig="toolbarConfig" :mode="mode" v-if="editorRef"/>
 
       <div class="form-control">
         <input type="value" required="" v-model="blogData.title">
@@ -21,7 +20,7 @@
     </div>
     <div class="form-group">
       <label for="image">封面图片:</label>
-      <el-upload ref="upload" :on-exceed="handleExceed" :on-success="handleSuccess" :on-error="handleError" :limit="1"
+      <el-upload  :on-exceed="handleExceed" :on-success="handleSuccess" :on-error="handleError" :limit="1"
         :file-list="fileList" :auto-upload="true"  list-type="picture-card"
         :http-request="customUploadRequest">
         <el-icon>
@@ -166,22 +165,6 @@ const publishBlog = async () => {
     validateBlogData();
     await submitBlog(); // 修正了这里缺少 await 的问题
 
-    ElMessage({
-      showClose: true,
-      message: 博客发布成功,
-      type: 'success',
-    });
-
-    // 清空输入字段
-    blogData.value.title = '';
-    blogData.value.content = '';
-    blogData.value.coverImageUid = null;
-    blogData.value.tags = null;
-    blogData.value.isOriginal = true;
-    blogData.value.originalUrl = '';
-    blogData.value.category = null;
-    blogData.value.coverImageUid = '';
-    blogData.value.introduction = '';
   } catch (error) {
     ElMessage({
       showClose: true,
@@ -196,7 +179,7 @@ const publishBlog = async () => {
 // 获取标签列表
 const fetchOptions = async () => {
   try {
-    const response = await fetchTagsOptionsApi(); // 假设后端 API 地址为 /api/tags
+    const response = await fetchTagsOptionsApi(); 
     console.log('标签列表:', response.data);
     options.value = response.data;
   } catch (error) {
@@ -219,11 +202,10 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-  const editor = editorRef.value;
-  if (editor == null) return;
-  editor.destroy();
-  editorRef.value.destroy();
-
+  if (editorRef.value) {
+        editorRef.value.destroy(); // 销毁编辑器实例
+        editorRef.value = null; // 清空引用
+  }
 });
 // 封面上传
 const handleExceed = (files) => {
@@ -282,6 +264,11 @@ const submitBlog = async () => {
   //2.插入的图片
   imgUidList.value.pop();
   uuidsToDelete.push(... imgUidList.value);
+
+  // 处理blogData.value.tags，即处理标签链，只取链尾
+  blogData.value.tags = blogData.value.tags.filter(sublist => sublist.length > 0) // 过滤空列表
+    .map(sublist => sublist[sublist.length - 1]); // 获取每个子列表的末尾元素
+
   
   // 直接使用 blogData.value 的值
   const requestData = {
@@ -294,9 +281,7 @@ const submitBlog = async () => {
     const response = await submitBlogApi(requestData);
     console.log(response.data);
 
-    if (response.ok) {
-      const data = await response.json();
-      console.log('博客发表成功:', data);
+    if (response.code = 200) {
       successMessage.value = '博客发布成功！';
       errorMessage.value = '';
       // 清空输入字段
@@ -307,15 +292,20 @@ const submitBlog = async () => {
       blogData.value.isOriginal = true;
       blogData.value.originalUrl = '';
     } else {
-      console.error('博客发表失败:', response.statusText);
       errorMessage.value = '博客发表失败';
       successMessage.value = '';
     }
   } catch (error) {
     console.error('博客发表失败:', error);
+    ElMessage({
+      showClose: true,
+      message: error.message,
+      type: 'error',
+    });
     errorMessage.value = error.message;
     successMessage.value = '';
   }
+  
 
   // 清空文件列表
   fileList.value = [];
