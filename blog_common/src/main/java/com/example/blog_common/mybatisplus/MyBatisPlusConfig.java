@@ -1,7 +1,5 @@
 package com.example.blog_common.mybatisplus;
 
-import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
-import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import org.apache.ibatis.type.TypeHandler;
 import org.example.base.mybatisplus.MyMetaObjectHandler;
 import org.example.base.mybatisplus.UuidToBinaryTypeHandler;
@@ -18,12 +16,6 @@ import org.springframework.context.annotation.Configuration;
 @MapperScan("com.example.blog_common.mapper")
 public class MyBatisPlusConfig {
 
-    @Bean
-    public MybatisPlusInterceptor mybatisPlusInterceptor() {
-        MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
-        interceptor.addInnerInterceptor(new PaginationInnerInterceptor());
-        return interceptor;
-    }
 
     @Bean
     public TypeHandler<String> uuidToBinaryTypeHandler() {

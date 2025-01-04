@@ -27,11 +27,11 @@ public class BaseVO<T>  {
      * 当前页
      */
 
-    private Long currentPage;
+    private Integer currentPage;
 
     /**
      * 页大小
      */
 
-    private Long pageSize;
+    private Integer pageSize;
 }

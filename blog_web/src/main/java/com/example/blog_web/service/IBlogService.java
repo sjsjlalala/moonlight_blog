@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.blog_web.entity.Blog;
 import com.example.blog_web.vo.BlogDetailVO;
 import com.example.blog_web.vo.BlogRequestVO;
+import com.example.blog_web.vo.BlogVO;
 import org.example.base.response.CommonResponse;
 
 import java.util.List;
@@ -20,5 +21,7 @@ public interface IBlogService extends IService<Blog> {
 
     CommonResponse addBlog(BlogRequestVO request);
 
-    CommonResponse<List<BlogDetailVO>> blogList();
+    CommonResponse<List<BlogDetailVO>> blogList(BlogVO requestBlogVO);
+
+    CommonResponse<BlogDetailVO> blogDetailByUid(String uid);
 }

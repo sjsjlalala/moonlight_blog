@@ -19,6 +19,7 @@ import org.example.base.mybatisplus.UuidToBinaryTypeHandler;
  * @since 2024-12-30
  */
 @Data
+
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("blog")

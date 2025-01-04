@@ -13,11 +13,9 @@ import org.example.base.validtor.group.Insert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -44,7 +42,13 @@ public class BlogController {
     @ApiOperation(value = "获取所有博客", notes = "获取所有博客")
     @PostMapping("/blogList")
     public CommonResponse<List<BlogDetailVO>> blogList(@RequestBody BlogVO blogVO) {
-        return blogService.blogList();
+        return blogService.blogList(blogVO);
+    }
+
+    @ApiOperation(value = "根据uid获取博客", notes = "根据uid获取博客")
+    @GetMapping("/blogDetailByUid/{uid}")
+    public CommonResponse<BlogDetailVO> blogDetailByUid(@NotNull @PathVariable String uid) {
+        return blogService.blogDetailByUid(uid);
     }
 
 

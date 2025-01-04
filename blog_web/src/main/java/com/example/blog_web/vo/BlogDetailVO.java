@@ -4,6 +4,8 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 /**
  * @Description：博客详情VO
  * @Author LiuMaoJi
@@ -15,4 +17,6 @@ import lombok.Setter;
 public class BlogDetailVO {
     private BlogVO blogVO;
     private UserVO userVO;
+    private List<TagVO> tags;
+    private UserCategoryVO userCategory;
 }

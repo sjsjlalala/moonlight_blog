@@ -1,26 +1,29 @@
 package com.example.blog_web.vo;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.List;
+import org.example.base.vo.BaseVO;
 
 /**
  * @Description
  * @Author LiuMaoJi
  * @Date 2024/12/31
  **/
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Getter
 @Setter
-public class TagVO {
+public class TagVO extends BaseVO<TagVO> {
 
+    private String tagName;
 
-    private String value;
+    private String description;
 
+    private String parentUid;
 
-    private String label;
+    private Long clicks;
 
-    private List<TagVO> children;
+    private Integer sort;
 }

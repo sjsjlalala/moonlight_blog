@@ -1,7 +1,7 @@
 package com.example.blog_web.controller;
 
 import com.example.blog_web.service.impl.TagServiceImpl;
-import com.example.blog_web.vo.TagVO;
+import com.example.blog_web.vo.OptionVO;
 import io.swagger.annotations.ApiOperation;
 import org.example.base.response.CommonResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ public class TagController {
     private TagServiceImpl tagService;
     @ApiOperation(value = "获取标签", notes = "获取标签")
     @GetMapping("/getTags")
-    public CommonResponse<List<TagVO>> getTags() {
+    public CommonResponse<List<OptionVO>> getTags() {
         return tagService.getTags();
     }
 }

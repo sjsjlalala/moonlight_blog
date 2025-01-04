@@ -2,7 +2,7 @@ package com.example.blog_web.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.blog_web.entity.Tag;
-import com.example.blog_web.vo.TagVO;
+import com.example.blog_web.vo.OptionVO;
 import org.example.base.response.CommonResponse;
 
 import java.util.List;
@@ -17,5 +17,5 @@ import java.util.List;
  */
 public interface ITagService extends IService<Tag> {
 
-    CommonResponse<List<TagVO>> getTags();
+    CommonResponse<List<OptionVO>> getTags();
 }
