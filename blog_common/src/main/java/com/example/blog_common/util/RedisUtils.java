@@ -65,6 +65,20 @@ public class RedisUtils {
     public <K> Set<K> keys(K key) {
         return redisTemplate.keys(key);
     }
+    /**
+     * 从键中获取指定索引的字段
+     *
+     * @param key 键
+     * @param index 字段索引
+     * @return 指定索引的字段值
+     */
+    public String getFieldFromKey(String key, int index) {
+        String[] fields = key.split(":");
+        if (index >= 0 && index < fields.length) {
+            return fields[index];
+        }
+        return null;
+    }
 
     /**
      * 判断key是否存在
