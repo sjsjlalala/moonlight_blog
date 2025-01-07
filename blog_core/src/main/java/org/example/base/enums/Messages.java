@@ -42,5 +42,15 @@ public interface Messages {
     String FILE_DELETE_SUCCESS = "文件删除成功";
     String FILE_DELETE_FAIL = "文件删除失败";
     String ADD_BLOG_SUCCESS = "博客添加成功";
+
+    /**
+     * 评论操作信息
+     */
+    String SUBMIT_COMMENT_SUCCESS = "评论成功";
+    String SUBMIT_COMMENT_FAIL = "评论失败";
+
+    String TOGGLE_LIKE_SUCCESS = "点赞成功";
+    String CANCEL_TOGGLE_LIKE_SUCCESS = "取消评论点赞成功";
+
 }
 

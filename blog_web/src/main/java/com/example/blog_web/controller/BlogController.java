@@ -2,6 +2,7 @@ package com.example.blog_web.controller;
 
 
 import com.example.blog_common.util.ThrowableUtils;
+import com.example.blog_web.entity.Blog;
 import com.example.blog_web.service.impl.BlogServiceImpl;
 import com.example.blog_web.vo.BlogDetailVO;
 import com.example.blog_web.vo.BlogRequestVO;
@@ -49,6 +50,18 @@ public class BlogController {
     @GetMapping("/blogDetailByUid/{uid}")
     public CommonResponse<BlogDetailVO> blogDetailByUid(@NotNull @PathVariable String uid) {
         return blogService.blogDetailByUid(uid);
+    }
+
+    @ApiOperation(value = "博客点赞/取消点赞", notes = "博客点赞/取消点赞")
+    @PostMapping("/blogToggleLike")
+    public CommonResponse blogToggleLike(@RequestBody BlogVO blogVO) {
+        return blogService.blogToggleLike(blogVO);
+    }
+
+    @ApiOperation(value = "博客收藏/取消收藏", notes = "博客收藏/取消收藏")
+    @PostMapping("/blogToggleCollection")
+    public CommonResponse blogToggleCollection(@RequestBody BlogVO blog) {
+        return blogService.blogToggleCollection(blog);
     }
 
 

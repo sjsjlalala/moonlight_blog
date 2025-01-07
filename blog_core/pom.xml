@@ -56,6 +56,12 @@
             <version>9.0.69</version>
             <scope>compile</scope>
         </dependency>
+        <!--jdk 8 日期序列化需要-->
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>2.15.2</version> <!-- 确保版本与你的Jackson版本兼容 -->
+        </dependency>
     </dependencies>
 
 </project>

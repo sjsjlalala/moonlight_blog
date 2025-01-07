@@ -91,6 +91,15 @@ public class RedisUtils {
     }
 
     /**
+     * 根据key删除缓
+     *
+     * @param key 键
+     */
+    public <K> void delete(String key) {
+        redisTemplate.delete(key);
+    }
+
+    /**
      * 设置分布式锁
      *
      * @param key     键，可以用用户主键

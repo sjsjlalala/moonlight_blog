@@ -13,7 +13,9 @@ import com.example.blog_web.entity.*;
 import com.example.blog_web.mapper.*;
 import com.example.blog_web.service.IBlogService;
 import com.example.blog_web.vo.*;
+import org.example.base.config.SysConfig;
 import org.example.base.enums.EStatus;
+import org.example.base.enums.ErrorCode;
 import org.example.base.enums.Messages;
 import org.example.base.response.CommonResponse;
 import org.example.base.uuid.UUIDUtil;
@@ -50,6 +52,8 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
     private TagMapper tagMapper;
     @Autowired
     private UserCategoryMapper userCategoryMapper;
+    @Autowired
+    private UserBlogFavoritesMapper userBlogFavoritesMapper;
     @Autowired
     private RedisUtils redisUtil;
 
@@ -149,6 +153,16 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
                 blogVO.setCoverImageUid(url);
             }
 
+            // 从缓存中获取点赞数量和点赞状态
+            String statusPrefix = SysConfig.BLOG_TOGGLE_LIKE_PREFIX + blog.getUid() + SysConfig.STATUS;
+            Integer likes = redisUtil.get(statusPrefix, Integer.class);
+            if (likes != null) {
+                blogVO.setLikes(likes);
+            }
+            if (redisUtil.hasKey(SysConfig.BLOG_TOGGLE_LIKE_PREFIX + blog.getUid() + SysConfig.USER + UserContext.getUser().getUid())) {
+                blogVO.setIsLiked(true);
+            }
+
             // 获取作者信息
             String authorUid = blog.getAuthorUid();
             User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUid, UUIDUtil.uuidToBytes(authorUid)));
@@ -208,6 +222,17 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
             String url = Objects.requireNonNull(coverImgUrl.block()).getData().toString();
             blogVO.setCoverImageUid(url);
         }
+
+        // 从缓存中获取点赞数量和点赞状态
+        String statusPrefix = SysConfig.BLOG_TOGGLE_LIKE_PREFIX + blog.getUid() + SysConfig.STATUS;
+        Integer likes = redisUtil.get(statusPrefix, Integer.class);
+        if (likes != null) {
+            blogVO.setLikes(likes);
+        }
+        if (redisUtil.hasKey(SysConfig.BLOG_TOGGLE_LIKE_PREFIX + blog.getUid() + SysConfig.USER + UserContext.getUser().getUid())) {
+            blogVO.setIsLiked(true);
+        }
+
         // 获取分组
         BlogUserCategorys blogUserCategorys = blogUserCategorysMapper.selectOne(new LambdaQueryWrapper<BlogUserCategorys>().eq(BlogUserCategorys::getBlogUid, UUIDUtil.uuidToBytes(blog.getUid())).eq(BlogUserCategorys::getStatus, EStatus.VALID));
         UserCategory temp = userCategoryMapper.selectOne(new LambdaQueryWrapper<UserCategory>().eq(UserCategory::getUid, UUIDUtil.uuidToBytes(blogUserCategorys.getUserCategoryUid())).eq(UserCategory::getStatus, EStatus.VALID));
@@ -227,5 +252,77 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
 
 
         return CommonResponse.success(blogDetailVO);
+    }
+    /**
+     * @description: 博客点赞/取消点赞，用redis存储点赞数据，定时任务持久化到数据库
+     * @author: moki
+     * @date: 2025/1/7 12:12
+     * @param: [blog]
+     * @return: org.example.base.response.CommonResponse<com.example.blog_web.vo.BlogDetailVO>
+     **/
+    @Override
+    public CommonResponse blogToggleLike(BlogVO blogVO) {
+        User userInfo = UserContext.getUser();
+        // 获取缓存
+        String userPrefix = SysConfig.BLOG_TOGGLE_LIKE_PREFIX + blogVO.getUid() + SysConfig.USER + userInfo.getUid();
+        String statusPrefix = SysConfig.BLOG_TOGGLE_LIKE_PREFIX + blogVO.getUid() + SysConfig.STATUS;
+
+        Integer likes = redisUtil.get(statusPrefix, Integer.class);
+
+        // 1.判断是点赞还是取消点赞
+        if (blogVO.getIsLiked()) {
+            // 点赞
+            // 更新缓存
+            UserBlogLike likeUser = new UserBlogLike();
+            likeUser.setUserUid(userInfo.getUid());
+            likeUser.setBlogUid(blogVO.getUid());
+            redisUtil.set(userPrefix, likeUser, SysConfig.TOGGLE_LIKE_EXPIRE_TIME);
+        } else {
+            // 取消点赞
+            // 删除user缓存
+            redisUtil.delete(userPrefix);
+        }
+        // 2.更新缓存状态
+        if (likes == null) {
+            // 缓存已经失效
+            // 更新数据库
+            Blog target = this.baseMapper.selectOne(new LambdaQueryWrapper<Blog>().eq(Blog::getUid, UUIDUtil.uuidToBytes(blogVO.getUid())).eq(Blog::getStatus, EStatus.VALID));
+            // 博客不存在
+            if (target == null) {
+                return CommonResponse.failure(ErrorCode.BLOG_NOT_EXIST.getCode(), ErrorCode.BLOG_NOT_EXIST.getMessage());
+            }
+            target.setLikes(blogVO.getLikes());
+            // 更新数据库
+            this.baseMapper.update(target, new LambdaQueryWrapper<Blog>().eq(Blog::getUid, UUIDUtil.uuidToBytes(blogVO.getUid())));
+
+        }
+        // 更新缓存
+        redisUtil.set(statusPrefix, blogVO.getLikes(), SysConfig.TOGGLE_LIKE_EXPIRE_TIME);
+        return CommonResponse.success(Messages.TOGGLE_LIKE_SUCCESS);
+    }
+    /**
+     * @description: 博客收藏/取消收藏
+     * @author: moki
+     * @date: 2025/1/7 16:27
+     * @param: [blogVO]
+     * @return: org.example.base.response.CommonResponse
+     **/
+    @Override
+    public CommonResponse blogToggleCollection(BlogVO blogVO) {
+        User userInfo = UserContext.getUser();
+        // 判断收藏还是取消收藏
+        if (blogVO.getIsFavorite()) {
+            if (userBlogFavoritesMapper.selectOne(new LambdaQueryWrapper<UserBlogFavorites>().eq(UserBlogFavorites::getUserUid, UUIDUtil.uuidToBytes(userInfo.getUid())).eq(UserBlogFavorites::getBlogUid, UUIDUtil.uuidToBytes(blogVO.getUid()))) != null) {
+                // 已经收藏
+                return CommonResponse.failure(ErrorCode.BLOG_ALREADY_COLLECTED.getCode(), ErrorCode.BLOG_ALREADY_COLLECTED.getMessage());
+            } else {
+               // 收藏
+                UserBlogFavorites userBlogFavorites = new UserBlogFavorites();
+                userBlogFavorites.setUserUid(userInfo.getUid());
+                userBlogFavorites.setBlogUid(blogVO.getUid());
+            }
+        }
+
+        return null;
     }
 }

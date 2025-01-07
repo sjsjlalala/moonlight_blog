@@ -4,6 +4,7 @@ import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.MappedJdbcTypes;
 import org.apache.ibatis.type.MappedTypes;
+import org.example.base.enums.EStatus;
 
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
@@ -19,6 +20,7 @@ import java.util.UUID;
 @MappedTypes({String.class})
 @MappedJdbcTypes(JdbcType.BINARY)
 public class UuidToBinaryTypeHandler extends BaseTypeHandler<String> {
+    private static final JdbcType JDBC_TYPE = JdbcType.BINARY; // 或者其他合适的类型
 
     /**
      * 设置非空参数方法，将 UUID 字符串转换为字节数组并设置到 PreparedStatement 中。
@@ -31,7 +33,13 @@ public class UuidToBinaryTypeHandler extends BaseTypeHandler<String> {
      */
     @Override
     public void setNonNullParameter(PreparedStatement ps, int i, String parameter, JdbcType jdbcType) throws SQLException {
-        if (parameter != null) {
+        if (parameter == null || parameter.isEmpty()) {
+            // 如果参数为空或空字符串，设置为 NULL
+            ps.setNull(i, JDBC_TYPE.TYPE_CODE);
+        } else if (parameter.equals(EStatus.isRoot)) {
+            // 如果参数是 isRoot，设置为 NULL
+            ps.setNull(i, JDBC_TYPE.TYPE_CODE);
+        } else {
             // 将 UUID 字符串转换为字节数组
             byte[] bytes = toBytes(UUID.fromString(parameter));
             // 将字节数组设置到 PreparedStatement 中指定的位置

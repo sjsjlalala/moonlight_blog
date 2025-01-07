@@ -3,6 +3,7 @@ package com.example.blog_web.vo;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import org.example.base.vo.BaseVO;
 
 /**
  * @Description: 用户信息VO
@@ -12,8 +13,8 @@ import lombok.Setter;
 @Data
 @Setter
 @Getter
-public class UserVO {
-
+public class UserVO extends BaseVO<UserVO> {
+    private String avatarUrl = "http://localhost:8084/upload-files/images/admin-9f6e9614-c2d1-11ef-8b2a-0242ac110003/1735904055874_d4969d732d2943919ffaa610e509e4d6.png";
     private String username;
 
     private String email;

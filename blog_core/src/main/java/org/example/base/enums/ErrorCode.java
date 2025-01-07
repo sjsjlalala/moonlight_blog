@@ -50,7 +50,14 @@ public enum ErrorCode {
 
     // 文件错误
     FILE_DELETE_FAILED(50006, "文件删除失败"),
-    FILE_NOT_FOUND(50007, "文件不存在" );
+
+    // 评论
+    COMMENT_CONTENT_NULL(50007, "评论内容不能为空"),
+    SUBMIT_COMMENT_FAILED(50008, "评论失败"),
+    COMMENT_NOT_EXIST(50009, "评论不存在"),
+    // 博客
+    BLOG_NOT_EXIST(50010, "博客不存在"),
+    BLOG_ALREADY_COLLECTED(50011, "博客已经收藏");
 
     private final int code;
     private final String message;

@@ -50,16 +50,18 @@ public class BlogVO extends BaseVO<BlogVO> {
 
 
     private Integer likes = 0;
+    private Boolean isLiked ;// 是否点赞
 
 
     private Integer favorites = 0;
+    private Boolean isFavorite ;// 是否收藏
 
 
     private String visibilityScope;
 
 
 
-    private boolean commentsAllowed ;
+    private int commentsAllowed ;
 
     private LocalDate createTime;
 

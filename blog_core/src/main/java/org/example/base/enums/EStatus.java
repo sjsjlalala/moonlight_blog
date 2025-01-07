@@ -32,5 +32,9 @@ public class EStatus {
      * 无效的
      **/
     public static final int INVALID = 0;
+    /**
+     * 根组件
+     **/
+    public static final String isRoot = "isRoot";
 
 }

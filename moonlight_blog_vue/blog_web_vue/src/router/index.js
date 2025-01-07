@@ -21,6 +21,7 @@ const router = createRouter({
       component: BlogDetail,
       props: true
     }
+    
   ],
 })
 

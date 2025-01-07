@@ -24,4 +24,8 @@ public interface IBlogService extends IService<Blog> {
     CommonResponse<List<BlogDetailVO>> blogList(BlogVO requestBlogVO);
 
     CommonResponse<BlogDetailVO> blogDetailByUid(String uid);
+
+    CommonResponse blogToggleLike(BlogVO blogVO);
+
+    CommonResponse blogToggleCollection(BlogVO blog);
 }
