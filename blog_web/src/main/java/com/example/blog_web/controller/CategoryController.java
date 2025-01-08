@@ -36,6 +36,11 @@ public class CategoryController {
         User userInfo = UserContext.getUser();
         return userCategoryService.getUserCategories(userInfo);
     }
+    @ApiOperation(value = "博客分组创建", notes = "博客分组创建")
+    @PostMapping("/createUserCategory")
+    public CommonResponse createUserCategory(@RequestBody UserCategoryVO categoryVO) {
+        return userCategoryService.createUserCategory(categoryVO);
+    }
     @ApiOperation(value = "博客收藏夹创建", notes = "博客收藏夹创建")
     @PostMapping("/createBlogCollectionCategory")
     public CommonResponse<UserCategoryVO> createBlogCollectionCategory(@RequestBody UserCategoryVO categoryVO) {

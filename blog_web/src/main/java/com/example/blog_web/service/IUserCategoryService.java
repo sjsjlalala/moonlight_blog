@@ -27,4 +27,6 @@ public interface IUserCategoryService extends IService<UserCategory> {
     CommonResponse<List<UserCategoryVO>> fetchBlogCollectionCategory(String uid);
 
     CommonResponse toggleBlogCollection(UserBlogFavoritesVO vo);
+
+    CommonResponse createUserCategory(UserCategoryVO categoryVO);
 }

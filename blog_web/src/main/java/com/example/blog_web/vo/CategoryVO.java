@@ -6,4 +6,5 @@ package com.example.blog_web.vo;
  * @Date 2025/1/1
  **/
 public class CategoryVO {
+
 }

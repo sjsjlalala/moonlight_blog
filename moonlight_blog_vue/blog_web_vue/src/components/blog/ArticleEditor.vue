@@ -1,7 +1,8 @@
 <template>
   <div class="blog-publish">
     <div class="form-group">
-      <Toolbar style="border-bottom: 1px solid #ccc" :editor="editorRef" :defaultConfig="toolbarConfig" :mode="mode" v-if="editorRef"/>
+      <Toolbar style="border-bottom: 1px solid #ccc" :editor="editorRef" :defaultConfig="toolbarConfig" :mode="mode"
+        v-if="editorRef" />
 
       <div class="form-control">
         <input type="value" required="" v-model="blogData.title">
@@ -14,30 +15,29 @@
         </label>
       </div>
 
-      <Editor style="height: 500px; overflow-y: hidden;" v-model="blogData.content" :defaultConfig="editorConfig" :mode="mode"
-        @onCreated="handleCreated" />
+      <Editor style="height: 500px; overflow-y: hidden;" v-model="blogData.content" :defaultConfig="editorConfig"
+        :mode="mode" @onCreated="handleCreated" />
 
     </div>
     <div class="form-group">
       <label for="image">封面图片:</label>
-      <el-upload  :on-exceed="handleExceed" :on-success="handleSuccess" :on-error="handleError" :limit="1"
-        :file-list="fileList" :auto-upload="true"  list-type="picture-card"
-        :http-request="customUploadRequest">
+      <el-upload :on-exceed="handleExceed" :on-success="handleSuccess" :on-error="handleError" :limit="1"
+        :file-list="fileList" :auto-upload="true" list-type="picture-card" :http-request="customUploadRequest">
         <el-icon>
           <Plus />
         </el-icon>
       </el-upload>
     </div>
     <div class="form-control">
-        <input type="value" required="" v-model="blogData.introduction">
-        <label>
-          <span style="transition-delay:0ms">请</span><span style="transition-delay:50ms"></span>
-          <span style="transition-delay:100ms">输</span><span style="transition-delay:150ms"></span>
-          <span style="transition-delay:200ms">入</span><span style="transition-delay:50ms"></span>
-          <span style="transition-delay:300ms">简</span><span style="transition-delay:150ms"></span>
-          <span style="transition-delay:400ms">介</span><span style="transition-delay:50ms"></span>
-        </label>
-      </div>
+      <input type="value" required="" v-model="blogData.introduction">
+      <label>
+        <span style="transition-delay:0ms">请</span><span style="transition-delay:50ms"></span>
+        <span style="transition-delay:100ms">输</span><span style="transition-delay:150ms"></span>
+        <span style="transition-delay:200ms">入</span><span style="transition-delay:50ms"></span>
+        <span style="transition-delay:300ms">简</span><span style="transition-delay:150ms"></span>
+        <span style="transition-delay:400ms">介</span><span style="transition-delay:50ms"></span>
+      </label>
+    </div>
     <div class="form-group">
       <label for="tags">标签:</label>
       <div class="m-4">
@@ -77,12 +77,44 @@
           </el-radio-group>
         </div>
       </div>
-      <div>
-        <label for="catogory">分组目录:</label>
+      <div class="form-category">
+        <label for="category">分组目录:</label>
         <div class="m-4">
-        <el-cascader placeholder="请选择分组,可搜索" :options="categoryOptions" :props = "categoryProps" filterable :show-all-levels="true"
-          tag-type="success" tag-effect="light" size="large" v-model="blogData.category" />
-      </div>
+          <el-cascader placeholder="请选择分组,可搜索" :options="categoryOptions" :props="categoryProps" filterable
+            :show-all-levels="true" tag-type="success" tag-effect="light" size="large" v-model="blogData.category"
+            @change="handleCategoryChange" />
+        </div>
+        <div>
+          <svg @click="DialogCategoryFormVisible = true" t="1736329542310" class="icon" viewBox="0 0 1024 1024"
+            version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2916" width="20" height="20">
+            <path
+              d="M514.048 62.464q93.184 0 175.616 35.328t143.872 96.768 96.768 143.872 35.328 175.616q0 94.208-35.328 176.128t-96.768 143.36-143.872 96.768-175.616 35.328q-94.208 0-176.64-35.328t-143.872-96.768-96.768-143.36-35.328-176.128q0-93.184 35.328-175.616t96.768-143.872 143.872-96.768 176.64-35.328zM772.096 576.512q26.624 0 45.056-18.944t18.432-45.568-18.432-45.056-45.056-18.432l-192.512 0 0-192.512q0-26.624-18.944-45.568t-45.568-18.944-45.056 18.944-18.432 45.568l0 192.512-192.512 0q-26.624 0-45.056 18.432t-18.432 45.056 18.432 45.568 45.056 18.944l192.512 0 0 191.488q0 26.624 18.432 45.568t45.056 18.944 45.568-18.944 18.944-45.568l0-191.488 192.512 0z"
+              p-id="2917"></path>
+          </svg>
+        </div>
+        <!-- 添加子目录对话框 -->
+        <el-dialog v-model="DialogCategoryFormVisible" title="添加子目录" width="500px">
+          <el-form :model="newCategory"  >
+            <el-form-item label="父目录" label-width="100px">
+              <el-cascader placeholder="请选择父目录" :options="categoryOptions" :props="categoryProps" filterable
+                :show-all-levels="true" tag-type="success" tag-effect="light" size="large"
+                v-model="newCategory.parent" />
+            </el-form-item>
+            <el-form-item label="子目录名称" label-width="100px">
+              <div class = "el-input-group">
+                <el-input v-model="newCategory.name" placeholder="请输入子目录名称" />
+                <el-input type="textarea" :rows="3" v-model="newCategory.description" autocomplete="off"
+                  placeholder="请输入子目录描述" />
+              </div>
+            </el-form-item>
+          </el-form>
+          <template #footer>
+            <span class="dialog-footer">
+              <el-button @click="DialogCategoryFormVisible = false">取消</el-button>
+              <el-button type="primary" @click="addSubCategory">确定</el-button>
+            </span>
+          </template>
+        </el-dialog>
       </div>
     </div>
     <el-button type="primary" plain size="large" color="#626aef" @click="publishBlog" :dark="false"
@@ -94,13 +126,16 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
-import {fetchTagsOptionsApi, fetchUserCategoriesApi, submitBlogApi} from '../../api/blogApi'
+import { fetchTagsOptionsApi, fetchUserCategoriesApi, submitBlogApi } from '../../api/blogApi'
+import {createUserCategoryApi} from '../../api/categoryApi'
 import '@wangeditor/editor/dist/css/style.css'; // 引入 css
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue';
-import { editorRef, toolbarConfig, editorConfig, mode, handleCreated,imgUidList } from '../../../config/wangEditorConfig';
+import { editorRef, toolbarConfig, editorConfig, mode, handleCreated, imgUidList } from '../../../config/wangEditorConfig';
 import axios from 'axios';
 import { ElMessage, genFileId } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
+
+
 
 
 
@@ -140,8 +175,13 @@ const categoryProps = {
 
 const successMessage = ref('');
 const errorMessage = ref('');
-
-
+// 分组
+let DialogCategoryFormVisible = ref(false);
+let newCategory = ref({
+  parent: [],
+  name: '',
+  description: ''
+});
 const validateBlogData = () => {
   if (!blogData.value.title) {
     throw new Error('请填写标题');
@@ -171,15 +211,15 @@ const publishBlog = async () => {
       message: error.message,
       type: 'error',
     });
-   
+
   }
-  
+
 };
 
 // 获取标签列表
 const fetchOptions = async () => {
   try {
-    const response = await fetchTagsOptionsApi(); 
+    const response = await fetchTagsOptionsApi();
     console.log('标签列表:', response.data);
     options.value = response.data;
   } catch (error) {
@@ -203,8 +243,8 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   if (editorRef.value) {
-        editorRef.value.destroy(); // 销毁编辑器实例
-        editorRef.value = null; // 清空引用
+    editorRef.value.destroy(); // 销毁编辑器实例
+    editorRef.value = null; // 清空引用
   }
 });
 // 封面上传
@@ -256,20 +296,20 @@ const customUploadRequest = (options) => {
 
 
 const submitBlog = async () => {
-  
+
   // 获取要删除的图片的 UUID
   //1.封面
   const filesToDelete = uploadedFiles.value.filter(f => f.uuid !== blogData.value.coverImageUid);
   const uuidsToDelete = filesToDelete.map(f => f.uuid);
   //2.插入的图片
   imgUidList.value.pop();
-  uuidsToDelete.push(... imgUidList.value);
+  uuidsToDelete.push(...imgUidList.value);
 
   // 处理blogData.value.tags，即处理标签链，只取链尾
   blogData.value.tags = blogData.value.tags.filter(sublist => sublist.length > 0) // 过滤空列表
     .map(sublist => sublist[sublist.length - 1]); // 获取每个子列表的末尾元素
 
-  
+
   // 直接使用 blogData.value 的值
   const requestData = {
     blogVO: { ...blogData.value }, // 使用解构赋值将响应式对象转换为普通对象
@@ -305,13 +345,56 @@ const submitBlog = async () => {
     errorMessage.value = error.message;
     successMessage.value = '';
   }
-  
+
 
   // 清空文件列表
   fileList.value = [];
   uploadedFiles.value = [];
   coverImageUuid.value = null;
 };
+
+const handleCategoryChange = (value) => {
+  // 处理选择的目录变化
+  console.log('选择的目录:', value);
+};
+const addSubCategory = async () => {
+  let parentValue ='';
+  if (newCategory.value.parent ) {
+    parentValue = newCategory.value.parent[newCategory.value.parent.length - 1];
+  } 
+  // 校验
+  try{
+    if (!newCategory.value.name) {
+    throw new Error('请输入子目录名称');
+  }
+  
+  if (!newCategory.value.description) {
+    throw new Error('请输入子目录描述');
+  }
+  }
+  catch (err) {
+    ElMessage({
+      showClose: true,
+      message: err.message,
+      type: 'error',
+    });
+    return;
+  }
+  const newSubCategory = {
+    parentUid: parentValue,
+    categoryName: newCategory.value.name,
+    description: newCategory.value.description
+  };
+  const response = await createUserCategoryApi(newSubCategory);
+  if (response.code === 200) {
+    newCategory.value.parent = [];
+    newCategory.value.name = '';
+    newCategory.value.description = '';
+    fetchCategories();
+    DialogCategoryFormVisible.value = false;
+  }
+};
+
 </script>
 
 
@@ -448,5 +531,17 @@ const submitBlog = async () => {
 .form-control input:valid+label span {
   color: rgb(141, 164, 175);
   transform: translateY(-30px);
+}
+
+.form-category {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.el-input-group {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 15px;
 }
 </style>

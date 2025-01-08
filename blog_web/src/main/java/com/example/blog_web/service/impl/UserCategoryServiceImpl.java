@@ -47,6 +47,7 @@ public class UserCategoryServiceImpl extends ServiceImpl<UserCategoryMapper, Use
                 new LambdaQueryWrapper<UserCategory>()
                         .eq(UserCategory::getUserUid, UUIDUtil.uuidToBytes(userInfo.getUid()))
                         .eq(UserCategory::getStatus, EStatus.VALID)
+                        .eq(UserCategory::getCategoryType, EStatus.BLOG_FOLDER)
                         .isNull(UserCategory::getParentUid)
         );
         // 递归获取所有层级的分类
@@ -171,6 +172,27 @@ public class UserCategoryServiceImpl extends ServiceImpl<UserCategoryMapper, Use
             }
         }
         return null;
+    }
+    /**
+     * @description: 创建用户博客分组目录
+     * @author: moki
+     * @date: 2025/1/8 18:15
+     * @param: [categoryVO]
+     * @return: org.example.base.response.CommonResponse
+     **/
+    @Override
+    public CommonResponse createUserCategory(UserCategoryVO categoryVO) {
+        User userInfo = UserContext.getUser();
+        categoryVO.setUserUid(userInfo.getUid());
+        UserCategory userCategory = BeanUtil.copyProperties(categoryVO, UserCategory.class);
+        userCategory.setCategoryType(EStatus.BLOG_FOLDER);
+        //创建分组
+        int insert = userCategoryMapper.insert(userCategory);
+        if (insert > 0) {
+            return CommonResponse.success(Messages.CREATE_CATEGORY_SUCCESS);
+        } else {
+            return CommonResponse.failure(ErrorCode.CREATE_CATEGORY_FAILED.getCode(), ErrorCode.CREATE_CATEGORY_FAILED.getMessage());
+        }
     }
 
 
