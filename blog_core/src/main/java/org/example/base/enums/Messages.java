@@ -52,5 +52,7 @@ public interface Messages {
     String TOGGLE_LIKE_SUCCESS = "点赞成功";
     String CANCEL_TOGGLE_LIKE_SUCCESS = "取消评论点赞成功";
 
+    String COLLECT_SUCCESS = "收藏成功";
+    String CANCEL_COLLECT_SUCCESS = "取消收藏成功";
 }
 

@@ -57,8 +57,11 @@ public enum ErrorCode {
     COMMENT_NOT_EXIST(50009, "评论不存在"),
     // 博客
     BLOG_NOT_EXIST(50010, "博客不存在"),
-    BLOG_ALREADY_COLLECTED(50011, "博客已经收藏");
+    BLOG_ALREADY_COLLECTED(50011, "博客已经收藏"),
 
+    CREATE_COLLECTION_FAILED (50012, "创建收藏夹失败"),
+    COLLECT_FAILED(50013, "博客收藏失败"),
+    CANCEL_COLLECT_FAILED(50014, "取消博客收藏失败" );
     private final int code;
     private final String message;
 

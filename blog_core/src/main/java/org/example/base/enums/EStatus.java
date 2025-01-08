@@ -36,5 +36,13 @@ public class EStatus {
      * 根组件
      **/
     public static final String isRoot = "isRoot";
+    /**
+     * 博客文件夹
+     **/
+    public static final int BLOG_FOLDER = 1;
+    /**
+     * 博客收藏夹
+     **/
+    public static final int BLOG_COLLECTION = 2;
 
 }

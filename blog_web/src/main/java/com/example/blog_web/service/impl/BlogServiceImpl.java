@@ -195,6 +195,7 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
         UserVO userVO = new UserVO();
         List<TagVO> tags = new ArrayList<>();
         UserCategoryVO userCategoryVO = new UserCategoryVO();
+        User userInfo = UserContext.getUser();
 
         // 1.先查询redis缓存
         Blog blog = redisUtil.get(uid, Blog.class);
@@ -242,6 +243,17 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
         // 获取作者信息
         String authorUid = blog.getAuthorUid();
         User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUid, UUIDUtil.uuidToBytes(authorUid)));
+
+        // 获取用户对此博客的收藏情况
+        List<UserBlogFavorites> userBlogFavorites = userBlogFavoritesMapper.selectList(new LambdaQueryWrapper<UserBlogFavorites>()
+                .eq(UserBlogFavorites::getBlogUid, UUIDUtil.uuidToBytes(blogVO.getUid()))
+                .eq(UserBlogFavorites::getUserUid, UUIDUtil.uuidToBytes(userInfo.getUid()))
+                .eq(UserBlogFavorites::getStatus, EStatus.VALID));
+        if (!userBlogFavorites.isEmpty()) {
+            blogVO.setIsFavorite(true);
+        }
+
+
 
         BeanUtil.copyProperties(user, userVO);
         // 组装最终结果视图

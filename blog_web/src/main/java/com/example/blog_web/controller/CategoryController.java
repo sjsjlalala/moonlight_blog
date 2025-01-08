@@ -5,13 +5,13 @@ import com.example.blog_web.context.UserContext;
 import com.example.blog_web.service.ICategoryService;
 import com.example.blog_web.service.IUserCategoryService;
 import com.example.blog_web.vo.OptionVO;
+import com.example.blog_web.vo.UserBlogFavoritesVO;
+import com.example.blog_web.vo.UserCategoryVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.example.base.response.CommonResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -36,4 +36,22 @@ public class CategoryController {
         User userInfo = UserContext.getUser();
         return userCategoryService.getUserCategories(userInfo);
     }
+    @ApiOperation(value = "博客收藏夹创建", notes = "博客收藏夹创建")
+    @PostMapping("/createBlogCollectionCategory")
+    public CommonResponse<UserCategoryVO> createBlogCollectionCategory(@RequestBody UserCategoryVO categoryVO) {
+        return userCategoryService.createBlogCollectionCategory(categoryVO);
+    }
+
+    @ApiOperation(value = "加载博客收藏夹", notes = "加载博客收藏夹")
+    @GetMapping("/fetchBlogCollectionCategory/{uid}")
+    public CommonResponse<List<UserCategoryVO>> fetchBlogCollectionCategory(@PathVariable String uid) {
+        return userCategoryService.fetchBlogCollectionCategory(uid);
+    }
+
+    @ApiOperation(value = "收藏/取消收藏博客", notes = "收藏/取消收藏博客")
+    @PostMapping("/toggleBlogCollection")
+    public CommonResponse toggleBlogCollection(@RequestBody UserBlogFavoritesVO vo) {
+        return userCategoryService.toggleBlogCollection(vo);
+    }
+
 }

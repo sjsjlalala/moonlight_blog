@@ -2,7 +2,6 @@ package com.example.blog_web.controller;
 
 
 import com.example.blog_common.util.ThrowableUtils;
-import com.example.blog_web.entity.Blog;
 import com.example.blog_web.service.impl.BlogServiceImpl;
 import com.example.blog_web.vo.BlogDetailVO;
 import com.example.blog_web.vo.BlogRequestVO;
@@ -63,6 +62,7 @@ public class BlogController {
     public CommonResponse blogToggleCollection(@RequestBody BlogVO blog) {
         return blogService.blogToggleCollection(blog);
     }
+
 
 
 

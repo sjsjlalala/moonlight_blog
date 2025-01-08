@@ -23,6 +23,7 @@ import org.example.base.response.CommonResponse;
 import org.example.base.uuid.UUIDUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -99,6 +100,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
      * @return: org.example.base.response.CommonResponse
      **/
     @Override
+    @Transactional
     public CommonResponse toggleLike(CommentVO commentVO) {
         User userInfo = UserContext.getUser();
         // 获取用户点赞缓存
