@@ -59,4 +59,10 @@ public class CategoryController {
         return userCategoryService.toggleBlogCollection(vo);
     }
 
+    @ApiOperation(value = "获取系统分类", notes = "获取系统分类")
+    @GetMapping("/fetchSysCategory")
+    public CommonResponse<List<OptionVO>> fetchSubjectCategory() {
+        return categoryService.getUserCategories();
+    }
 }
+

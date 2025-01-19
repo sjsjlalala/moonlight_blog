@@ -27,6 +27,7 @@ import reactor.core.publisher.Mono;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -336,5 +337,39 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
         }
 
         return null;
+    }
+    /**
+     * @description: 根据标签uid获取博客列表
+     * @author: moki
+     * @date: 2025/1/9 15:56
+     * @param: [tagUid]
+     * @return: org.example.base.response.CommonResponse<java.util.List < com.example.blog_web.vo.BlogVO>>
+     **/
+    @Override
+    public CommonResponse<List<BlogVO>> fetchBlogListByTag(String tagUid) {
+        List<BlogVO> blogVOS = new ArrayList<>();
+        // 判断该标签是否有子标签
+        List<Tag> childTags = tagMapper.selectList(new LambdaQueryWrapper<Tag>().eq(Tag::getParentUid, UUIDUtil.uuidToBytes(tagUid)).eq(Tag::getStatus, EStatus.VALID));
+        if (!childTags.isEmpty()) {
+            // 有子标签
+            for (Tag childTag : childTags) {
+                // 获取子标签下的博客
+                List<BlogTags> blogTags = blogTagsMapper.selectList(new LambdaQueryWrapper<BlogTags>().eq(BlogTags::getTagUid, UUIDUtil.uuidToBytes(childTag.getUid())).eq(BlogTags::getStatus, EStatus.VALID));
+                for (BlogTags blogTag : blogTags) {
+                    List<Blog> blogs = blogMapper.selectList(new LambdaQueryWrapper<Blog>().eq(Blog::getUid, UUIDUtil.uuidToBytes(blogTag.getBlogUid())).eq(Blog::getStatus, EStatus.VALID));
+                    blogVOS.addAll(BeanUtil.copyToList(blogs, BlogVO.class));
+                }
+            }
+        } else {
+            // 无子标签,本身就是子标签
+            List<BlogTags> blogTags = blogTagsMapper.selectList(new LambdaQueryWrapper<BlogTags>().eq(BlogTags::getTagUid, UUIDUtil.uuidToBytes(tagUid)).eq(BlogTags::getStatus, EStatus.VALID));
+            for (BlogTags blogTag : blogTags) {
+                List<Blog> blogs = blogMapper.selectList(new LambdaQueryWrapper<Blog>().eq(Blog::getUid, UUIDUtil.uuidToBytes(blogTag.getBlogUid())).eq(Blog::getStatus, EStatus.VALID));
+                blogVOS.addAll(BeanUtil.copyToList(blogs, BlogVO.class));
+            }
+        }
+        // 去重
+        blogVOS = blogVOS.stream().distinct().collect(Collectors.toList());
+        return CommonResponse.success(blogVOS);
     }
 }

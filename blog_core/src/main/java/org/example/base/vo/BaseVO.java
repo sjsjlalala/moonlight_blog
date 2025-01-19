@@ -19,10 +19,14 @@ public class BaseVO<T>  {
     private Integer status = 1 ;
 
     /**
-     * 关键字
+     * 关键字1
      */
     private String keyword;
 
+    /**
+     * 关键字2
+     */
+    private String filterWord;
     /**
      * 当前页
      */

@@ -62,6 +62,11 @@ public class BlogController {
     public CommonResponse blogToggleCollection(@RequestBody BlogVO blog) {
         return blogService.blogToggleCollection(blog);
     }
+    @ApiOperation(value = "根据标签获取博客列表", notes = "根据标签获取博客列表")
+    @GetMapping("/fetchBlogListByTag/{tagUid}")
+    public CommonResponse<List<BlogVO>> fetchBlogListByTag(@NotNull @PathVariable String tagUid) {
+        return blogService.fetchBlogListByTag(tagUid);
+    }
 
 
 

@@ -5,8 +5,10 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.blog_common.entity.User;
 import com.example.blog_web.context.UserContext;
+import com.example.blog_web.entity.Blog;
 import com.example.blog_web.entity.UserBlogFavorites;
 import com.example.blog_web.entity.UserCategory;
+import com.example.blog_web.mapper.BlogMapper;
 import com.example.blog_web.mapper.UserBlogFavoritesMapper;
 import com.example.blog_web.mapper.UserCategoryMapper;
 import com.example.blog_web.service.IUserCategoryService;
@@ -39,6 +41,8 @@ public class UserCategoryServiceImpl extends ServiceImpl<UserCategoryMapper, Use
     private UserCategoryMapper userCategoryMapper;
     @Autowired
     private UserBlogFavoritesMapper userBlogFavoritesMapper;
+    @Autowired
+    private BlogMapper blogMapper;
     @Override
     public CommonResponse<List<OptionVO>> getUserCategories(User userInfo) {
         List<OptionVO> optionsVO = new ArrayList<>();
@@ -137,6 +141,16 @@ public class UserCategoryServiceImpl extends ServiceImpl<UserCategoryMapper, Use
                 target.setStatus(EStatus.VALID);
                 // 更新数据库
                 int update = userBlogFavoritesMapper.update(target, new LambdaQueryWrapper<UserBlogFavorites>().eq(UserBlogFavorites::getUid, UUIDUtil.uuidToBytes(target.getUid())));
+                // 更新blog收藏数
+                Blog blog = blogMapper.selectOne(new LambdaQueryWrapper<Blog>().eq(Blog::getUid, UUIDUtil.uuidToBytes(target.getBlogUid())));
+                // 查找收藏信息，统一多少个用户收藏
+                Integer userCount = userBlogFavoritesMapper.selectCount(
+                        new LambdaQueryWrapper<UserBlogFavorites>()
+                                .eq(UserBlogFavorites::getBlogUid, UUIDUtil.uuidToBytes(target.getBlogUid()))
+                                .eq(UserBlogFavorites::getStatus, EStatus.VALID)
+                                .groupBy(UserBlogFavorites::getUserUid));
+                blog.setFavorites(userCount);
+                blogMapper.update(blog, new LambdaQueryWrapper<Blog>().eq(Blog::getUid, UUIDUtil.uuidToBytes(target.getBlogUid())));
                 if (update > 0) {
                     return CommonResponse.success(Messages.COLLECT_SUCCESS);
                 } else {
@@ -164,6 +178,16 @@ public class UserCategoryServiceImpl extends ServiceImpl<UserCategoryMapper, Use
             if (userBlogFavorites != null) {
                 userBlogFavorites.setStatus(EStatus.INVALID);
                 int update = userBlogFavoritesMapper.update(userBlogFavorites, new LambdaQueryWrapper<UserBlogFavorites>().eq(UserBlogFavorites::getUid, UUIDUtil.uuidToBytes(userBlogFavorites.getUid())));
+                // 更新blog收藏数
+                Blog blog = blogMapper.selectOne(new LambdaQueryWrapper<Blog>().eq(Blog::getUid, UUIDUtil.uuidToBytes(userBlogFavorites.getBlogUid())));
+                // 查找收藏信息，统一多少个用户收藏
+                Integer userCount = userBlogFavoritesMapper.selectCount(
+                        new LambdaQueryWrapper<UserBlogFavorites>()
+                                .eq(UserBlogFavorites::getBlogUid, UUIDUtil.uuidToBytes(userBlogFavorites.getBlogUid()))
+                                .eq(UserBlogFavorites::getStatus, EStatus.VALID)
+                                .groupBy(UserBlogFavorites::getUserUid));
+                blog.setFavorites(userCount == null ? 0 : userCount);
+                blogMapper.update(blog, new LambdaQueryWrapper<Blog>().eq(Blog::getUid, UUIDUtil.uuidToBytes(userBlogFavorites.getBlogUid())));
                 if (update > 0) {
                     return CommonResponse.success(Messages.CANCEL_COLLECT_SUCCESS);
                 } else {

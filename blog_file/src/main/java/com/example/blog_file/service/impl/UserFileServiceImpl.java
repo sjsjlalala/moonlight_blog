@@ -119,9 +119,9 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFile> i
         List<String> fileNames = new ArrayList<>();
         // 1.删除数据库中的数据
         for (String uuid : uuids) {
-            UserFile userFile = userFileMapper.selectById(UUIDUtil.uuidToBytes(uuid));
+            UserFile userFile = userFileMapper.selectOne(new LambdaQueryWrapper<UserFile>().eq(UserFile::getUid, UUIDUtil.uuidToBytes(uuid)));
             fileNames.add(userFile.getFileUrl());
-            if (userFileMapper.deleteById(uuid) == 0) {
+            if (userFileMapper.delete(new LambdaQueryWrapper<UserFile>().eq(UserFile::getUid, UUIDUtil.uuidToBytes(uuid))) == 0) {
                 log.error("文件删除失败！");
                 return CommonResponse.failure(ErrorCode.FILE_DELETE_FAILED.getCode(), ErrorCode.FILE_DELETE_FAILED.getMessage(), null);
             }

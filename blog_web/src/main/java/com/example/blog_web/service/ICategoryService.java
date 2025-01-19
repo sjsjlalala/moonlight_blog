@@ -1,9 +1,8 @@
 package com.example.blog_web.service;
 
-import com.example.blog_common.entity.User;
-import com.example.blog_web.entity.Category;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.example.blog_web.vo.UserCategoryVO;
+import com.example.blog_web.entity.Category;
+import com.example.blog_web.vo.OptionVO;
 import org.example.base.response.CommonResponse;
 
 import java.util.List;
@@ -18,7 +17,7 @@ import java.util.List;
  */
 public interface ICategoryService extends IService<Category> {
 
-    CommonResponse<List<UserCategoryVO>> getUserCategories(User userInfo);
+    CommonResponse<List<OptionVO>> getUserCategories();
 
 
 }

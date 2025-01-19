@@ -45,9 +45,20 @@
           tag-type="success" tag-effect="light" size="large" v-model="blogData.tags" />
       </div>
     </div>
-    <div class="form-group">
-      <label for="isOriginal">是否原创:</label>
-      <el-switch v-model="blogData.isOriginal" />
+    <div class="form-original">
+      <div>
+        <label for="isOriginal">是否原创:</label>
+        <el-switch v-model="blogData.isOriginal" />
+      </div>
+      <div class="form-scope">
+        <label for="catogory">可见范围: </label>
+        <div class="my-2 ml-4">
+          <el-radio-group v-model="blogData.visibilityScope">
+            <el-radio value="1">所有人可见</el-radio>
+            <el-radio value="2">仅自己可见</el-radio>
+          </el-radio-group>
+        </div>
+      </div>
     </div>
     <div class="form-group" v-if="!blogData.isOriginal">
       <div class="form-control">
@@ -68,15 +79,6 @@
         <label for="commentsAllowed">是否开启评论:</label>
         <el-switch v-model="blogData.commentsAllowed" />
       </div>
-      <div class="form-scope">
-        <label for="catogory">可见范围: </label>
-        <div class="my-2 ml-4">
-          <el-radio-group v-model="blogData.visibilityScope">
-            <el-radio value="1">所有人可见</el-radio>
-            <el-radio value="2">仅自己可见</el-radio>
-          </el-radio-group>
-        </div>
-      </div>
       <div class="form-category">
         <label for="category">分组目录:</label>
         <div class="m-4">
@@ -94,14 +96,14 @@
         </div>
         <!-- 添加子目录对话框 -->
         <el-dialog v-model="DialogCategoryFormVisible" title="添加子目录" width="500px">
-          <el-form :model="newCategory"  >
+          <el-form :model="newCategory">
             <el-form-item label="父目录" label-width="100px">
               <el-cascader placeholder="请选择父目录" :options="categoryOptions" :props="categoryProps" filterable
                 :show-all-levels="true" tag-type="success" tag-effect="light" size="large"
                 v-model="newCategory.parent" />
             </el-form-item>
             <el-form-item label="子目录名称" label-width="100px">
-              <div class = "el-input-group">
+              <div class="el-input-group">
                 <el-input v-model="newCategory.name" placeholder="请输入子目录名称" />
                 <el-input type="textarea" :rows="3" v-model="newCategory.description" autocomplete="off"
                   placeholder="请输入子目录描述" />
@@ -116,6 +118,67 @@
           </template>
         </el-dialog>
       </div>
+
+      <div class="subject">
+        <label for="commentsAllowed">专题管理:</label>
+        <el-switch v-model="subjectVisibility" />
+        <div class="subject-list" v-if="subjectVisibility">
+          <el-select v-model="blogData.subject" filterable placeholder="请选择专题" style="width: 240px">
+            <el-option v-for="item in subjectOptions" :key="item.value" :label="item.label" :value="item.value" />
+          </el-select>
+
+          <svg @click="DialogSubjectFormVisible = true" t="1736329542310" class="icon" viewBox="0 0 1024 1024"
+            version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2916" width="20" height="20">
+            <path
+              d="M514.048 62.464q93.184 0 175.616 35.328t143.872 96.768 96.768 143.872 35.328 175.616q0 94.208-35.328 176.128t-96.768 143.36-143.872 96.768-175.616 35.328q-94.208 0-176.64-35.328t-143.872-96.768-96.768-143.36-35.328-176.128q0-93.184 35.328-175.616t96.768-143.872 143.872-96.768 176.64-35.328zM772.096 576.512q26.624 0 45.056-18.944t18.432-45.568-18.432-45.056-45.056-18.432l-192.512 0 0-192.512q0-26.624-18.944-45.568t-45.568-18.944-45.056 18.944-18.432 45.568l0 192.512-192.512 0q-26.624 0-45.056 18.432t-18.432 45.056 18.432 45.568 45.056 18.944l192.512 0 0 191.488q0 26.624 18.432 45.568t45.056 18.944 45.568-18.944 18.944-45.568l0-191.488 192.512 0z"
+              p-id="2917"></path>
+          </svg>
+
+          <!-- 添加专题对话框 -->
+          <el-dialog v-model="DialogSubjectFormVisible" title="添加专题" width="500px">
+            <el-form :model="newSubject">
+              <el-form-item label="专题名称" label-width="100px">
+                <div class="el-input-group">
+                  <el-input v-model="newSubject.subjectName" placeholder="请输入专题名称" />
+                </div>
+              </el-form-item>
+
+              <el-form-item label="专题描述" label-width="100px">
+                <div class="el-input-group">
+                  <el-input type="textarea" :rows="3" v-model="newSubject.summary" autocomplete="off"
+                    placeholder="请输入专题描述" />
+                </div>
+              </el-form-item>
+              <el-form-item label="专题分类" label-width="100px">
+                <el-cascader placeholder="专题分类" :options="sysCategoryoptions" filterable :show-all-levels="false"
+                  tag-type="success" tag-effect="light" size="large" v-model="newArray" />
+              </el-form-item>
+
+              <!-- 图片上传 -->
+              <el-form-item label="专题封面" label-width="100px">
+                <div class="form-group">
+                  <el-upload :on-success="handleSuccessOfSubject" :on-error="handleError" :on-remove="handleRemove"
+                    :limit="1" :file-list="fileList" :auto-upload="true" list-type="picture-card"
+                    :http-request="customUploadRequest">
+                    <el-icon>
+                      <Plus />
+                    </el-icon>
+                  </el-upload>
+                </div>
+              </el-form-item>
+
+            </el-form>
+
+            <template #footer>
+              <span class="dialog-footer">
+                <el-button @click="DialogSubjectFormVisible = false">取消</el-button>
+                <el-button type="primary" @click="addSubject">确定</el-button>
+              </span>
+            </template>
+          </el-dialog>
+        </div>
+      </div>
+
     </div>
     <el-button type="primary" plain size="large" color="#626aef" @click="publishBlog" :dark="false"
       :plain="true">发表文章</el-button>
@@ -127,7 +190,9 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { fetchTagsOptionsApi, fetchUserCategoriesApi, submitBlogApi } from '../../api/blogApi'
-import {createUserCategoryApi} from '../../api/categoryApi'
+import { createUserCategoryApi, fetchSysCategoryApi } from '../../api/categoryApi'
+import { deleteFileApi } from '../../api/fileApi'
+import { createSubjectApi, fetchUserSubjectApi } from '../../api/subjectApi'
 import '@wangeditor/editor/dist/css/style.css'; // 引入 css
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue';
 import { editorRef, toolbarConfig, editorConfig, mode, handleCreated, imgUidList } from '../../../config/wangEditorConfig';
@@ -137,7 +202,7 @@ import { Plus } from '@element-plus/icons-vue'
 
 
 
-
+const uploadPath = import.meta.env.VITE_FILE_UPLOAD_URL;
 
 // 博客对象
 const blogData = ref({
@@ -150,7 +215,9 @@ const blogData = ref({
   originalUrl: 'http://localhost', // 原创地址
   tags: '', // 博客标签
   visibilityScope: '1',// 可见范围
-  category: '' // 博客分类
+  category: '', // 博客分类
+  subject: '', // 博客专题
+
 });
 // 封面对象
 const upload = ref()
@@ -158,11 +225,23 @@ const fileList = ref([])
 const uploadedFiles = ref([])
 const coverImageUuid = ref(null)
 
+const newArray = ref([])
 // 标签对象
 const options = ref([]);
 // 分组对象
 const categoryOptions = ref([]);
-
+// 系统分组
+const sysCategoryoptions = ref([]);
+// 专题对象
+const subjectOptions = ref([]);
+const subjectVisibility = ref(false);
+const DialogSubjectFormVisible = ref(false);
+const newSubject = ref({
+  subjectName: '',
+  summary: '',
+  fileUid: '',
+  categoryUid: ''
+});
 // 标签级联选择器属性
 const props = {
   multiple: true,
@@ -235,10 +314,20 @@ const fetchCategories = async () => {
     console.error('获取用户分组数据失败:', error);
   }
 };
-
+// 获取系统分组
+const fetchConfigCategory = async () => {
+  try {
+    const response = await fetchSysCategoryApi();
+    sysCategoryoptions.value = response.data;
+  } catch (error) {
+    console.error('获取系统分组数据失败:', error);
+  }
+};
 onMounted(() => {
   fetchOptions();
   fetchCategories();
+  fetchSubjectList();
+  fetchConfigCategory();
 });
 
 onBeforeUnmount(() => {
@@ -267,6 +356,14 @@ const handleSuccess = (response, file, fileList) => {
   console.log('上传后返回的图片uuid:', response.data)
   uploadedFiles.value.push({ file, uuid: response.data.uid })
   blogData.value.coverImageUid = response.data.uid
+}
+const handleSuccessOfSubject = (response, file, fileList) => {
+  console.log('上传成功:', response)
+  console.log('文件:', file)
+  console.log('文件列表:', fileList)
+  // 将上传后返回的图片uuid保存
+  console.log('上传后返回的图片uuid:', response.data)
+  newSubject.value.fileUid = response.data.uid
 }
 
 const handleError = (err, file, fileList) => {
@@ -358,19 +455,19 @@ const handleCategoryChange = (value) => {
   console.log('选择的目录:', value);
 };
 const addSubCategory = async () => {
-  let parentValue ='';
-  if (newCategory.value.parent ) {
+  let parentValue = '';
+  if (newCategory.value.parent) {
     parentValue = newCategory.value.parent[newCategory.value.parent.length - 1];
-  } 
+  }
   // 校验
-  try{
+  try {
     if (!newCategory.value.name) {
-    throw new Error('请输入子目录名称');
-  }
-  
-  if (!newCategory.value.description) {
-    throw new Error('请输入子目录描述');
-  }
+      throw new Error('请输入子目录名称');
+    }
+
+    if (!newCategory.value.description) {
+      throw new Error('请输入子目录描述');
+    }
   }
   catch (err) {
     ElMessage({
@@ -394,7 +491,59 @@ const addSubCategory = async () => {
     DialogCategoryFormVisible.value = false;
   }
 };
+// 上传前的验证
+const beforeUpload = (file) => {
+  const isImage = file.type.startsWith('image/');
+  if (!isImage) {
+    this.$message.error('只能上传图片文件!');
+  }
+  const isLt2M = file.size / 1024 / 1024 < 2;
+  if (!isLt2M) {
+    this.$message.error('上传图片大小不能超过 2MB!');
+  }
+  return isImage && isLt2M;
+};
 
+
+// 处理图片删除
+const handleRemove = async (file, fileList) => {
+  const uuids = ref([]);
+  uuids.value.push(newSubject.value.fileUid)
+  const response = await deleteFileApi(uuids.value)
+  if (response.code === 200) {
+    newSubject.value.fileUid = ''
+  }
+
+};
+
+// 新建专题
+const addSubject = async () => {
+  // 提交表单数据，包含新建的专题和上传的图片
+  // 处理分组链，只取链尾
+  newSubject.value.categoryUid = (newArray.value.length > 0) ? newArray.value[newArray.value.length - 1] : null;
+  console.log(newArray.value)
+  const response = await createSubjectApi(newSubject.value)
+  if (response.code === 200) {
+    ElMessage.success('创建成功');
+    console.log('创建的专题数据:', newSubject.value);
+    DialogSubjectFormVisible.value = false;
+    newSubject.value = ''
+    fetchSubjectList();
+  } else {
+    ElMessage.error('创建失败');
+  }
+
+};
+// 获取专题列表
+const fetchSubjectList = async () => {
+  const response = await fetchUserSubjectApi();
+  if (response.code === 200) {
+    subjectOptions.value = response.data;
+    console.log('专题列表:', subjectOptions.value);
+  } else {
+    console.error('获取专题列表失败:', response.message);
+  }
+};
 </script>
 
 
@@ -448,14 +597,16 @@ const addSubCategory = async () => {
   display: flex;
   flex-direction: row;
   box-sizing: border-box;
-  justify-content: flex-start;
+  justify-content: space-between;
+  /*等距 水平居中 */
+
   /* 子元素靠左对齐 */
-  align-items: flex-start;
+  align-items: center;
   /* 确保子元素在交叉轴上靠上对齐 */
 }
 
 .form-other>div {
-  flex: 1;
+
   /* 让每个子元素平分可用空间 */
   margin-right: 10px;
   /* 可选：为子元素之间添加间距 */
@@ -472,6 +623,16 @@ const addSubCategory = async () => {
   box-sizing: border-box;
   align-items: center;
   /* 垂直对齐子元素 */
+}
+
+.form-original {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: row;
+  box-sizing: border-box;
+  align-items: center;
+  /* 垂直对齐子元素 */
+  gap: 100px;
 }
 
 .success-message {
@@ -538,6 +699,19 @@ const addSubCategory = async () => {
   flex-direction: row;
   align-items: center;
 }
+
+.subject {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.subject-list {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
 .el-input-group {
   display: flex;
   align-items: center;

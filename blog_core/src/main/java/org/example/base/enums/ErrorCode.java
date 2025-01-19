@@ -63,7 +63,11 @@ public enum ErrorCode {
     COLLECT_FAILED(50013, "博客收藏失败"),
     CANCEL_COLLECT_FAILED(50014, "取消博客收藏失败" ),
     // 分组
-    CREATE_CATEGORY_FAILED(50015, "创建分组失败");
+    CREATE_CATEGORY_FAILED(50015, "创建分组失败"),
+    FILE_NOT_FOUND(50016, "文件不存在"),
+    // 专题
+    CREATE_SUBJECT_FAILED(50017, "创建专题失败"),
+    FETCH_USER_SUBJECT_FAILED(50018,"" );
     private final int code;
     private final String message;
 

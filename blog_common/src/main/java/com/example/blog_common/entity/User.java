@@ -7,7 +7,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import org.example.base.model.BaseEntity;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * <p>
@@ -54,7 +54,7 @@ public class User extends BaseEntity<User> {
             user.setType(Integer.parseInt(parts[5]));
             user.setRemarks(parts[6]);
             user.setStatus(Integer.parseInt(parts[7]));
-            user.setCreateTime(LocalDate.parse(parts[8]));
+            user.setCreateTime(LocalDateTime.parse(parts[8]));
 
             return user;
         } catch (Exception e) {

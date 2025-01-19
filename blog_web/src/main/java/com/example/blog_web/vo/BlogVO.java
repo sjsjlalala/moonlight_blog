@@ -3,8 +3,6 @@ package com.example.blog_web.vo;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
 import org.example.base.vo.BaseVO;
 
 import java.time.LocalDate;
@@ -17,12 +15,11 @@ import java.util.List;
  **/
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Setter
-@Getter
 public class BlogVO extends BaseVO<BlogVO> {
 
 
     private String authorUid;
+    private String authorName;
 
 
     private String introduction;
@@ -61,7 +58,7 @@ public class BlogVO extends BaseVO<BlogVO> {
 
 
 
-    private int commentsAllowed ;
+    private Boolean commentsAllowed ;
 
     private LocalDate createTime;
 

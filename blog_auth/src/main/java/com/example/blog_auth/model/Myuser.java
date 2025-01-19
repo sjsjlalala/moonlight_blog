@@ -14,7 +14,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -55,7 +55,7 @@ public class Myuser  extends User implements UserDetails{
 
     private Integer status;
 
-    private LocalDate createTime;
+    private LocalDateTime createTime;
 
 
     public Myuser(String username, String password, Collection<? extends GrantedAuthority> authorities) {
@@ -83,7 +83,7 @@ public class Myuser  extends User implements UserDetails{
         user.setType(Integer.parseInt(parts[5]));
         user.setRemarks(parts[6]);
         user.setStatus(Integer.parseInt(parts[7]));
-        user.setCreateTime(LocalDate.parse(parts[8]));
+        user.setCreateTime(LocalDateTime.parse(parts[8]));
         return user;
     }
 
