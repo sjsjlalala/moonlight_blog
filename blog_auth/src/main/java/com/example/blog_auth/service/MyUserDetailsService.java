@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.util.Collections;
-import java.util.Objects;
+import java.util.Optional;
 
 
 @Service
@@ -56,8 +56,13 @@ public class MyUserDetailsService implements UserDetailsService {
         // 处理用户头像
         if (user.getAvatarUid() != null) {
             Mono<CommonResponse> fileUrl = fileFeignClient.getFileUrlById(user.getAvatarUid());
-            myuser.setAvatarUid(Objects.requireNonNull(fileUrl.block()).getData().toString());
+            CommonResponse response = fileUrl.block();
+            myuser.setAvatarUid(Optional.ofNullable(response)
+                    .map(CommonResponse::getData)
+                    .map(Object::toString)
+                    .orElse(null));
         }
+
         return myuser;
     }
 }

@@ -10,6 +10,7 @@ import BlogCategory from '@/components/category/BlogCategory.vue'
 import BlogList from '@/components/blog/BlogList.vue'
 import Login from '@/views/Login.vue'
 import UserInfo from '@/components/user/UserInfo.vue'
+import ContentManagement from '@/components/user/ContentManagement.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -66,7 +67,11 @@ const router = createRouter({
       name: 'UserInfo',
       component: UserInfo,
     },
-    
+    {
+      path: '/contentManagement',
+      name: 'ContentManagement',
+      component: ContentManagement,
+    }
     
   ],
 })

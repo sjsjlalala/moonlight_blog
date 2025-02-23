@@ -5,10 +5,12 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.example.blog_auth.model.Myuser;
 import com.example.blog_common.entity.User;
 import com.example.blog_common.service.impl.UserServiceImpl;
 import org.example.base.enums.ErrorCode;
 import org.example.base.response.CommonResponse;
+import org.example.base.uuid.UUIDUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -85,9 +87,9 @@ public class JwtUtil {
      * @param userDetails 用户详情对象
      * @return 如果令牌有效则返回 true，否则返回 false
      */
-    public CommonResponse validateToken(String token, UserDetails userDetails) {
+    public CommonResponse validateToken(String token, Myuser userDetails) {
         // 用户是否允许登录
-        User user = userService.getOne(new QueryWrapper<User>().eq("username", userDetails.getUsername()));
+        User user = userService.getOne(new QueryWrapper<User>().eq("uid", UUIDUtil.uuidToBytes(userDetails.getUid())));
         if (user == null) {
             return CommonResponse.failure(ErrorCode.USER_NOT_FOUND.getCode(), ErrorCode.USER_NOT_FOUND.getMessage());
         }
