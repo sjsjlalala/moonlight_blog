@@ -21,6 +21,8 @@ public class TokenRedisService {
 
     private static final String TOKEN_PREFIX = "token:";
     private static final String USER_PREFIX = "user:";
+
+    private static final String VERIFICATION_CODE_PREFIX = "verificationCode:";
     private static final Long TOKEN_EXPIRATION = 315360000L; // 令牌过期时间，单位分钟
 
     public void saveToken(String token, String username) {
@@ -53,5 +55,24 @@ public class TokenRedisService {
 
     public boolean isTokenValid(String token) {
         return redisTemplate.hasKey(TOKEN_PREFIX + token);
+    }
+
+    /*
+      邮箱验证码保存
+     */
+    public void saveVerificationCode(String email, String verificationCode) {
+        redisTemplate.opsForValue().set(VERIFICATION_CODE_PREFIX + email, verificationCode, 5, TimeUnit.MINUTES);
+    }
+
+     /*
+      邮箱验证码 验证
+     */
+    public boolean isVerificationCodeValid(String email, String verificationCode) {
+        String code = redisTemplate.opsForValue().get(VERIFICATION_CODE_PREFIX + email);
+        return code != null && code.equals(verificationCode);
+    }
+
+    public void deleteVerificationCode(String email) {
+        redisTemplate.delete(VERIFICATION_CODE_PREFIX + email);
     }
 }

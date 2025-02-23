@@ -6,6 +6,10 @@ import TagView from '@/views/Tag.vue'
 
 import Subject from '@/views/Subject.vue'
 import SubjectDetail from '@/components/subject/SubjectDetail.vue'
+import BlogCategory from '@/components/category/BlogCategory.vue'
+import BlogList from '@/components/blog/BlogList.vue'
+import Login from '@/views/Login.vue'
+import UserInfo from '@/components/user/UserInfo.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -40,7 +44,29 @@ const router = createRouter({
       name: 'SubjectDetail',
       component: SubjectDetail,
       props: true
-    }
+    },
+    {
+      path: '/blogCategory',
+      name: 'BlogCategory',
+      component: BlogCategory,
+    },
+    {
+      path: '/BlogList/:keyword',
+      name: 'BlogList',
+      component: BlogList,
+      props: true
+    },
+    {
+      path: '/login',
+      name: 'Login',
+      component: Login,
+    },
+    {
+      path: '/userInfo',
+      name: 'UserInfo',
+      component: UserInfo,
+    },
+    
     
   ],
 })

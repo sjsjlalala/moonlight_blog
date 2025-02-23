@@ -61,7 +61,7 @@ public class ThrowableUtils {
     public static String checkToken(HttpServletRequest request) {
         String token = TokenUtil.resolveToken(request);
         if (token == null || token.isEmpty()) {
-            throw new InnerGateWayException(ErrorCode.INNER_GATEWAY_ERROR.getMessage() + "异常请求路径： " + request.getRequestURI());
+            throw new InnerGateWayException(ErrorCode.INNER_GATEWAY_ERROR.getMessage() + "异常请求路径： " + request.getRequestURI(), null, ErrorCode.INNER_GATEWAY_ERROR.getCode());
         }
         return token;
     }

@@ -17,6 +17,11 @@ public enum ErrorCode {
     USER_ALREADY_EXISTS(40901, "用户已存在"),
     INVALID_CREDENTIALS(40101, "用户名或密码错误"),
     Blog_ADD_FAILED(50001, "添加博客失败"),
+
+    REGISTRY_FAILED(50001, "注册失败"),
+
+    CODE_ERROR(40001, "验证码错误"),
+
     
     // JWT 相关错误
     INVALID_TOKEN(40102, "无效的令牌"),
@@ -42,7 +47,7 @@ public enum ErrorCode {
     REQUEST_PARAMS_NOT_MULTIPART(50013, "请求参数不是Multipart格式"),
 
     // 内部错误
-    INNER_GATEWAY_ERROR(50001, "内部网关错误,传入了空token"),
+    INNER_GATEWAY_ERROR(401, "内部网关错误,传入了空token"),
     INNER_GATEWAY_TIMEOUT(50002, "内部网关超时"),
     INNER_GATEWAY_SERVICE_UNAVAILABLE(50003, "内部网关服务不可用"),
     INNER_GATEWAY_BAD_GATEWAY(50004, "内部网关错误"),
@@ -66,8 +71,9 @@ public enum ErrorCode {
     CREATE_CATEGORY_FAILED(50015, "创建分组失败"),
     FILE_NOT_FOUND(50016, "文件不存在"),
     // 专题
-    CREATE_SUBJECT_FAILED(50017, "创建专题失败"),
-    FETCH_USER_SUBJECT_FAILED(50018,"" );
+    CREATE_SUBJECT_FAILED(50017, "创建专题失败");
+
+
     private final int code;
     private final String message;
 

@@ -57,5 +57,12 @@ public interface Messages {
     String COLLECT_SUCCESS = "收藏成功";
     String CANCEL_COLLECT_SUCCESS = "取消收藏成功";
     String CREATE_CATEGORY_SUCCESS = "创建分组成功";
+
+    String UPDATE_SUCCESS = "更新成功";
+    String DELETE_SUCCESS = "删除成功";
+
+    String REGISTRY_SUCCESS = "注册成功";
+    String LOGIN_SUCCESS = "登录成功";
+    String RESET_PASSWORD_SUCCESS = "密码重置成功";
 }
 

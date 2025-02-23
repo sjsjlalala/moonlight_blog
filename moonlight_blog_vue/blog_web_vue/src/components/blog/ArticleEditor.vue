@@ -94,19 +94,14 @@
               p-id="2917"></path>
           </svg>
         </div>
-        <!-- 添加子目录对话框 -->
-        <el-dialog v-model="DialogCategoryFormVisible" title="添加子目录" width="500px">
+        <!-- 添加目录对话框 -->
+        <el-dialog v-model="DialogCategoryFormVisible" title="添加目录" width="500px">
           <el-form :model="newCategory">
-            <el-form-item label="父目录" label-width="100px">
-              <el-cascader placeholder="请选择父目录" :options="categoryOptions" :props="categoryProps" filterable
-                :show-all-levels="true" tag-type="success" tag-effect="light" size="large"
-                v-model="newCategory.parent" />
-            </el-form-item>
-            <el-form-item label="子目录名称" label-width="100px">
+            <el-form-item label="目录名称" label-width="100px">
               <div class="el-input-group">
-                <el-input v-model="newCategory.name" placeholder="请输入子目录名称" />
+                <el-input v-model="newCategory.name" placeholder="请输入目录名称" />
                 <el-input type="textarea" :rows="3" v-model="newCategory.description" autocomplete="off"
-                  placeholder="请输入子目录描述" />
+                  placeholder="请输入目录描述" />
               </div>
             </el-form-item>
           </el-form>
@@ -249,7 +244,7 @@ const props = {
 };
 // 分组级联选择器属性
 const categoryProps = {
-  checkStrictly: false
+  checkStrictly: true
 };
 
 const successMessage = ref('');
@@ -428,6 +423,11 @@ const submitBlog = async () => {
       blogData.value.tags = '';
       blogData.value.isOriginal = true;
       blogData.value.originalUrl = '';
+
+      // 清空文件列表
+      fileList.value = [];
+      uploadedFiles.value = [];
+      coverImageUuid.value = null;
     } else {
       errorMessage.value = '博客发表失败';
       successMessage.value = '';
@@ -443,11 +443,6 @@ const submitBlog = async () => {
     successMessage.value = '';
   }
 
-
-  // 清空文件列表
-  fileList.value = [];
-  uploadedFiles.value = [];
-  coverImageUuid.value = null;
 };
 
 const handleCategoryChange = (value) => {
@@ -489,6 +484,11 @@ const addSubCategory = async () => {
     newCategory.value.description = '';
     fetchCategories();
     DialogCategoryFormVisible.value = false;
+    ElMessage({
+      showClose: true,
+      message: "添加目录成功",
+      type: 'success',
+    });
   }
 };
 // 上传前的验证

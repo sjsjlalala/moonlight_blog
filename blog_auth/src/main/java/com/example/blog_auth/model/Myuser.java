@@ -55,9 +55,14 @@ public class Myuser  extends User implements UserDetails{
 
     private Integer status;
 
+    private String avatarUid;
+
     private LocalDateTime createTime;
 
+    public Myuser() {
+        super("", "", Collections.EMPTY_LIST);
 
+    }
     public Myuser(String username, String password, Collection<? extends GrantedAuthority> authorities) {
         super(username, password, authorities);
     }
@@ -69,7 +74,7 @@ public class Myuser  extends User implements UserDetails{
 
     @Override
     public String toString() {
-        return uid + "," + username + "," + password + "," + email + "," + phone + "," + type + "," + remarks + "," + status + "," + createTime;
+        return uid + "," + username + "," + password + "," + email + "," + phone + "," + type + "," + remarks + "," + status + "," + createTime + "," + avatarUid;
     }
 
     public static Myuser fromString(String userString) {
@@ -79,11 +84,16 @@ public class Myuser  extends User implements UserDetails{
         user.setPassword(parts[2]);
         user.setUid(parts[0]);
         user.setEmail(parts[3]);
+        if (!parts[4].equals("null"))
         user.setPhone(parts[4]);
+        if (!parts[5].equals("null"))
         user.setType(Integer.parseInt(parts[5]));
+        if (!parts[6] .equals("null"))
         user.setRemarks(parts[6]);
+        if (!parts[7].equals("null"))
         user.setStatus(Integer.parseInt(parts[7]));
         user.setCreateTime(LocalDateTime.parse(parts[8]));
+        user.setAvatarUid(parts[9]);
         return user;
     }
 

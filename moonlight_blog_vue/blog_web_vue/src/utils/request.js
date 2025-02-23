@@ -33,7 +33,7 @@ function createService(baseURL) {
     },
     error => {
       handleErrorResponse(error);
-      return Promise.reject(error);
+      return error.response.data;
     }
   );
 
@@ -43,9 +43,10 @@ function createService(baseURL) {
 // 统一错误处理函数
 function handleErrorResponse(error) {
   if (error.response) {
-    switch (error.response.status) {
+    switch (error.response.data.code) {
       case 401:
         console.error('未授权，请重新登录');
+        
         break;
       case 404:
         console.error('请求的资源不存在');

@@ -28,6 +28,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InsertException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public CommonResponse<Throwable> handleInsertFailedException(InsertException ex) {
+        log.error("错误", ex);
         return CommonResponse.failure(ex.getCode(), ex.getMessage(), ex.getCause());
     }
     /**
@@ -48,6 +49,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InnerGateWayException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public CommonResponse<Throwable> In(InnerGateWayException ex) {
+        log.error("错误", ex);
         return CommonResponse.failure(ex.getCode(), ex.getMessage(), ex.getCause());
     }
 }
