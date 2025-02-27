@@ -64,4 +64,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         }
 
     }
+
+    @Override
+    public CommonResponse getUserHomePage(String uid) {
+        // 1. 获取用户元数据
+
+        return null;
+    }
+
 }

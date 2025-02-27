@@ -17,4 +17,6 @@ public interface IUserService extends IService<User> {
     CommonResponse updateUserInfo(User userInfo, User user);
 
     CommonResponse updateUserEmail(String newEmail, String verificationCode, User userInfo);
+
+    CommonResponse getUserHomePage(String uid);
 }

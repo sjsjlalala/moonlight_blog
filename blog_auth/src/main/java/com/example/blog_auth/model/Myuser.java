@@ -56,7 +56,7 @@ public class Myuser  extends User implements UserDetails{
     private Integer status;
 
     private String avatarUid;
-
+    private String avatarUrl;
     private LocalDateTime createTime;
 
     public Myuser() {

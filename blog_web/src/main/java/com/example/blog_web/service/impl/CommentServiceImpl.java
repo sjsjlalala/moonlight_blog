@@ -5,14 +5,18 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.blog_common.entity.User;
+import com.example.blog_common.feign.FileFeignClient;
 import com.example.blog_common.mapper.UserMapper;
 import com.example.blog_common.util.RedisUtils;
 import com.example.blog_web.context.UserContext;
+import com.example.blog_web.entity.Blog;
 import com.example.blog_web.entity.Comment;
 import com.example.blog_web.entity.UserCommentLike;
+import com.example.blog_web.mapper.BlogMapper;
 import com.example.blog_web.mapper.CommentMapper;
 import com.example.blog_web.mapper.UserCommentLikeMapper;
 import com.example.blog_web.service.ICommentService;
+import com.example.blog_web.vo.BlogDetailVO;
 import com.example.blog_web.vo.CommentVO;
 import com.example.blog_web.vo.UserVO;
 import org.example.base.config.SysConfig;
@@ -24,8 +28,11 @@ import org.example.base.uuid.UUIDUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * <p>
@@ -42,7 +49,13 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
     @Autowired
     private RedisUtils redisUtil;
     @Autowired
+    private BlogMapper blogMapper;
+    @Autowired
+    private BlogServiceImpl blogService;
+    @Autowired
     private UserCommentLikeMapper userCommentLikeMapper;
+    @Autowired
+    private FileFeignClient fileFeignClient;
     /**
      * @description: 获取博客评论
      * @author: moki
@@ -141,6 +154,62 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
         return CommonResponse.success(Messages.TOGGLE_LIKE_SUCCESS);
     }
 
+    @Override
+    public CommonResponse<List<CommentVO>> getUserComment(@RequestBody CommentVO commentVO) {
+        User userInfo = UserContext.getUser();
+        //分页参数
+        int currentPage = commentVO.getCurrentPage() != null ? commentVO.getCurrentPage() : 1;
+        int pageSize = commentVO.getPageSize() != null ? commentVO.getPageSize() : 10;
+
+        String uid = userInfo.getUid();
+
+        // 分页找出父评论
+        Page<Comment> commentPage = this.baseMapper.selectPage(new Page<>(currentPage, pageSize), new LambdaQueryWrapper<Comment>()
+                .eq(Comment::getUserUid, UUIDUtil.uuidToBytes(uid))
+                .eq(Comment::getStatus, EStatus.VALID)
+                .isNull(Comment::getParentUid));
+        List<Comment> rootComments = commentPage.getRecords();
+        List<CommentVO> commentVOs = BeanUtil.copyToList(rootComments, CommentVO.class);
+        // 递归组合所有父子评论
+        getComments(commentVOs, userInfo);
+
+        // 组装博客信息
+
+        for (CommentVO comment : commentVOs) {
+            if (comment.getBlogUid() != null && blogMapper.selectCount(new LambdaQueryWrapper<Blog>().eq(Blog::getUid, UUIDUtil.uuidToBytes(comment.getBlogUid())).eq(Blog::getStatus, EStatus.VALID) ) > 0) {
+                CommonResponse<BlogDetailVO> blogDetailVOCommonResponse = blogService.blogDetailByUid(comment.getBlogUid());
+                if (blogDetailVOCommonResponse.getData() != null) {
+                    comment.setBlogVO(blogDetailVOCommonResponse.getData());
+                }
+            }
+
+        }
+
+        return CommonResponse.success(commentVOs);
+
+
+    }
+
+    @Override
+    public CommonResponse updateComment(CommentVO comment) {
+        Comment target = this.baseMapper.selectOne(new LambdaQueryWrapper<Comment>().eq(Comment::getUid, UUIDUtil.uuidToBytes(comment.getUid())).eq(Comment::getStatus, EStatus.VALID));
+        if (target == null) {
+            return CommonResponse.failure(ErrorCode.COMMENT_NOT_EXIST.getCode(), ErrorCode.COMMENT_NOT_EXIST.getMessage());
+        }
+        target.setContent(comment.getContent());
+        int update = this.baseMapper.update(target, new LambdaQueryWrapper<Comment>().eq(Comment::getUid, UUIDUtil.uuidToBytes(comment.getUid())));
+        if (update > 0) {
+            return CommonResponse.success(Messages.UPDATE_SUCCESS);
+        }
+        return CommonResponse.failure(ErrorCode.UPDATE_FAILED.getCode(), ErrorCode.UPDATE_FAILED.getMessage());
+    }
+
+    @Override
+    public CommonResponse deleteComment(CommentVO comment) {
+        this.baseMapper.delete(new LambdaQueryWrapper<Comment>().eq(Comment::getUid, UUIDUtil.uuidToBytes(comment.getUid())));
+        return CommonResponse.success(Messages.DELETE_SUCCESS);
+    }
+
 //    /**
 //     * @description: 取消点赞，用redis缓存，设置定时任务存入数据库
 //     * @author: moki
@@ -170,7 +239,18 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
             UserVO userVO = new UserVO();
             User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUid, UUIDUtil.uuidToBytes(commentVO.getUserUid())));
             BeanUtil.copyProperties(user, userVO);
+            // 处理用户头像
+            if (user.getAvatarUid() != null) {
+                Mono<CommonResponse> fileUrl = fileFeignClient.getFileUrlById(user.getAvatarUid());
+                CommonResponse response = fileUrl.block();
+                userVO.setAvatarUrl(Optional.ofNullable(response)
+                        .map(CommonResponse::getData)
+                        .map(Object::toString)
+                        .orElse(null));
+            }
             commentVO.setUserVO(userVO);
+
+
 
             // 从缓存获取该用户对此博客的点赞状态(若用户已经登录）
             if (UserContext.getUser() != null) {

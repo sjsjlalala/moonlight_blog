@@ -14,9 +14,7 @@ import com.example.blog_web.mapper.BlogUserCategorysMapper;
 import com.example.blog_web.mapper.UserBlogFavoritesMapper;
 import com.example.blog_web.mapper.UserCategoryMapper;
 import com.example.blog_web.service.IUserCategoryService;
-import com.example.blog_web.vo.OptionVO;
-import com.example.blog_web.vo.UserBlogFavoritesVO;
-import com.example.blog_web.vo.UserCategoryVO;
+import com.example.blog_web.vo.*;
 import org.example.base.enums.EStatus;
 import org.example.base.enums.ErrorCode;
 import org.example.base.enums.Messages;
@@ -47,6 +45,8 @@ public class UserCategoryServiceImpl extends ServiceImpl<UserCategoryMapper, Use
     private BlogMapper blogMapper;
     @Autowired
     private BlogUserCategorysMapper blogUserCategorysMapper;
+    @Autowired
+    private BlogServiceImpl blogServiceImpl;
     @Override
     public CommonResponse<List<OptionVO>> getUserCategories(User userInfo) {
         List<OptionVO> optionsVO = new ArrayList<>();
@@ -104,7 +104,10 @@ public class UserCategoryServiceImpl extends ServiceImpl<UserCategoryMapper, Use
         // 获取用户信息
         User userInfo = UserContext.getUser();
         // 获取收藏夹
-        List<UserCategory> targets = this.baseMapper.selectList(new LambdaQueryWrapper<UserCategory>().eq(UserCategory::getUserUid, UUIDUtil.uuidToBytes(userInfo.getUid())).eq(UserCategory::getCategoryType, EStatus.BLOG_COLLECTION));
+        List<UserCategory> targets = this.baseMapper.selectList(new LambdaQueryWrapper<UserCategory>()
+                .eq(UserCategory::getUserUid, UUIDUtil.uuidToBytes(userInfo.getUid()))
+                .eq(UserCategory::getCategoryType, EStatus.BLOG_COLLECTION)
+                .eq(UserCategory::getStatus, EStatus.VALID));
         List<UserCategoryVO> res = BeanUtil.copyToList(targets, UserCategoryVO.class);
         // 判断是否有文件夹已经收录该博客
         res.forEach(userCategoryVO -> {
@@ -234,16 +237,14 @@ public class UserCategoryServiceImpl extends ServiceImpl<UserCategoryMapper, Use
         if (blogUserCategorys == null) {
             return CommonResponse.failure(ErrorCode.SELECT_FAILED.getCode(), ErrorCode.SELECT_FAILED.getMessage());
         }
-        List<Blog> blogs = new ArrayList<>();
+        List<BlogDetailVO> res = new ArrayList<>();
         for (BlogUserCategorys blogUserCategory : blogUserCategorys) {
-            Blog blog = blogMapper.selectOne(new LambdaQueryWrapper<Blog>().eq(Blog::getUid, UUIDUtil.uuidToBytes(blogUserCategory.getBlogUid())).eq(Blog::getStatus, EStatus.VALID));
-            if (blog == null)
-                continue;
-            blogs.add(blog);
+            CommonResponse<BlogDetailVO> data = blogServiceImpl.blogDetailByUid(blogUserCategory.getBlogUid());
+            res.add(data.getData());
         }
-        if (blogs.isEmpty())
+        if (res.isEmpty())
             return CommonResponse.failure(ErrorCode.SELECT_FAILED.getCode(), ErrorCode.SELECT_FAILED.getMessage());
-        return CommonResponse.success(blogs);
+        return CommonResponse.success(res);
     }
 
     @Override
@@ -284,6 +285,95 @@ public class UserCategoryServiceImpl extends ServiceImpl<UserCategoryMapper, Use
         userCategoryMapper.delete(new LambdaQueryWrapper<UserCategory>().eq(UserCategory::getUid, UUIDUtil.uuidToBytes(uid)));
 
         return CommonResponse.success(Messages.DELETE_SUCCESS);
+    }
+
+    @Override
+    public CommonResponse getUserCollection(String uid) {
+        List<UserCategoryVO> res = new ArrayList<>();
+
+
+        User user = UserContext.getUser();
+        if (uid != null) {
+            user.setUid(uid);
+        }
+
+        // 获取用户的收藏夹以及收藏夹下的博客
+        List<UserCategory> userCategories = userCategoryMapper.selectList(new LambdaQueryWrapper<UserCategory>()
+                .eq(UserCategory::getUserUid, UUIDUtil.uuidToBytes(user.getUid()))
+                .eq(UserCategory::getCategoryType, EStatus.BLOG_COLLECTION)
+                .eq(UserCategory::getStatus, EStatus.VALID));
+        if (!userCategories.isEmpty()) {
+            for (UserCategory userCategory : userCategories) {
+                UserCategoryVO userCategoryVO = BeanUtil.copyProperties(userCategory, UserCategoryVO.class);
+
+                List<UserBlogFavorites> userBlogFavorites = userBlogFavoritesMapper.selectList(new LambdaQueryWrapper<UserBlogFavorites>()
+                        .eq(UserBlogFavorites::getCategoryUid, UUIDUtil.uuidToBytes(userCategory.getUid()))
+                        .eq(UserBlogFavorites::getStatus, EStatus.VALID));
+                if (!userBlogFavorites.isEmpty()) {
+                    List<BlogVO> blogVOS = new ArrayList<>();
+                    for (UserBlogFavorites userBlogFavorite : userBlogFavorites) {
+                        if (blogMapper.selectCount(new LambdaQueryWrapper<Blog>().eq(Blog::getUid, UUIDUtil.uuidToBytes(userBlogFavorite.getBlogUid())).eq(Blog::getStatus, EStatus.VALID) ) > 0) {
+                            CommonResponse<BlogDetailVO> blogDetailVOCommonResponse = blogServiceImpl.blogDetailByUid(userBlogFavorite.getBlogUid());
+                            blogVOS.add(blogDetailVOCommonResponse.getData().getBlogVO());
+                        }
+
+                    }
+                    userCategoryVO.setBlogs(blogVOS);
+                }
+                res.add(userCategoryVO);
+            }
+        }
+        return CommonResponse.success(res);
+    }
+
+    @Override
+    public CommonResponse updateBlogCollection(UserCategoryVO categoryVO) {
+        User userInfo = UserContext.getUser();
+        UserCategory userCategory = userCategoryMapper.selectOne(new LambdaQueryWrapper<UserCategory>()
+                .eq(UserCategory::getUid, UUIDUtil.uuidToBytes(categoryVO.getUid()))
+                .eq(UserCategory::getUserUid, UUIDUtil.uuidToBytes(userInfo.getUid())));
+        if (userCategory != null) {
+            userCategory.setCategoryName(categoryVO.getCategoryName());
+            userCategory.setDescription(categoryVO.getDescription());
+        }
+        if (userCategoryMapper.update(userCategory, new LambdaQueryWrapper<UserCategory>()
+                .eq(UserCategory::getUid, UUIDUtil.uuidToBytes(categoryVO.getUid()))
+                .eq(UserCategory::getUserUid, UUIDUtil.uuidToBytes(userInfo.getUid()))) > 0) {
+            return CommonResponse.success(Messages.UPDATE_SUCCESS);
+        } else {
+            return CommonResponse.failure(ErrorCode.UPDATE_FAILED.getCode(), ErrorCode.UPDATE_FAILED.getMessage());
+        }
+    }
+
+    @Override
+    public CommonResponse deleteBlogCollectionCategory(String uid) {
+        User userInfo = UserContext.getUser();
+        // 1. 删除关联表
+        UserBlogFavorites userBlogFavorites = userBlogFavoritesMapper.selectOne(new LambdaQueryWrapper<UserBlogFavorites>()
+                .eq(UserBlogFavorites::getCategoryUid, UUIDUtil.uuidToBytes(uid))
+                .eq(UserBlogFavorites::getStatus, EStatus.VALID));
+        if (userBlogFavorites != null) {
+            userBlogFavorites.setStatus(EStatus.DISABLED);
+            userBlogFavoritesMapper.update(userBlogFavorites, new LambdaQueryWrapper<UserBlogFavorites>()
+                    .eq(UserBlogFavorites::getUid, UUIDUtil.uuidToBytes(userBlogFavorites.getUid()))
+                    .eq(UserBlogFavorites::getStatus, EStatus.VALID));
+        }
+        // 2.删除分组表数据
+        int res = 0;
+                UserCategory userCategory = userCategoryMapper.selectOne(new LambdaQueryWrapper<UserCategory>()
+                .eq(UserCategory::getUid, UUIDUtil.uuidToBytes(uid))
+                .eq(UserCategory::getUserUid, UUIDUtil.uuidToBytes(UserContext.getUser().getUid())));
+        if (userCategory != null) {
+            userCategory.setStatus(EStatus.DISABLED);
+            res = userCategoryMapper.update(userCategory, new LambdaQueryWrapper<UserCategory>()
+                    .eq(UserCategory::getUid, UUIDUtil.uuidToBytes(userCategory.getUid()))
+                    .eq(UserCategory::getUserUid, UUIDUtil.uuidToBytes(userInfo.getUid())));
+        }
+        if (res > 0) {
+            return CommonResponse.success(Messages.DELETE_SUCCESS);
+        } else {
+            return CommonResponse.failure(ErrorCode.DELETE_FAILED.getCode(), ErrorCode.DELETE_FAILED.getMessage());
+        }
     }
 
 

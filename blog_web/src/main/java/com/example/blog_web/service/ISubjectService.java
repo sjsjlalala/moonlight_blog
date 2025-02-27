@@ -1,9 +1,10 @@
 package com.example.blog_web.service;
 
-import com.example.blog_web.entity.Subject;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.example.blog_web.entity.Subject;
 import com.example.blog_web.vo.OptionVO;
 import com.example.blog_web.vo.SubjectDetailVO;
+import com.example.blog_web.vo.SubjectVO;
 import org.example.base.response.CommonResponse;
 
 import java.util.List;
@@ -23,4 +24,12 @@ public interface ISubjectService extends IService<Subject> {
     CommonResponse<List<OptionVO>> fetchUserSubject();
 
     CommonResponse<List<SubjectDetailVO>> fetchSubjectDetail(SubjectDetailVO subjectDetailVO);
+
+    CommonResponse updateSubject(SubjectVO subjectVO);
+
+    CommonResponse fetchSubjectBlog(SubjectVO subjectVO);
+
+    CommonResponse addBlogToSubject(String subjectUid, String blogUid);
+
+    CommonResponse deleteSubjectBlog(String subjectUid, String blogUid);
 }

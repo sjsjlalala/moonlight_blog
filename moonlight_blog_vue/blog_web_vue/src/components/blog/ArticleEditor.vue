@@ -1,5 +1,6 @@
 <template>
   <div class="blog-publish">
+    <h2>{{ isEditMode ? '编辑博客' : '新建博客' }}</h2>
     <div class="form-group">
       <Toolbar style="border-bottom: 1px solid #ccc" :editor="editorRef" :defaultConfig="toolbarConfig" :mode="mode"
         v-if="editorRef" />
@@ -54,8 +55,8 @@
         <label for="catogory">可见范围: </label>
         <div class="my-2 ml-4">
           <el-radio-group v-model="blogData.visibilityScope">
-            <el-radio value="1">所有人可见</el-radio>
-            <el-radio value="2">仅自己可见</el-radio>
+            <el-radio value=1>所有人可见</el-radio>
+            <el-radio value=2>仅自己可见</el-radio>
           </el-radio-group>
         </div>
       </div>
@@ -81,11 +82,9 @@
       </div>
       <div class="form-category">
         <label for="category">分组目录:</label>
-        <div class="m-4">
-          <el-cascader placeholder="请选择分组,可搜索" :options="categoryOptions" :props="categoryProps" filterable
-            :show-all-levels="true" tag-type="success" tag-effect="light" size="large" v-model="blogData.category"
-            @change="handleCategoryChange" />
-        </div>
+        <el-select v-model="blogData.category" placeholder="请选择分组" size="large" style="width: 240px">
+          <el-option v-for="item in categoryOptions" :key="item.value" :label="item.label" :value="item.value" />
+        </el-select>
         <div>
           <svg @click="DialogCategoryFormVisible = true" t="1736329542310" class="icon" viewBox="0 0 1024 1024"
             version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2916" width="20" height="20">
@@ -153,7 +152,7 @@
               <el-form-item label="专题封面" label-width="100px">
                 <div class="form-group">
                   <el-upload :on-success="handleSuccessOfSubject" :on-error="handleError" :on-remove="handleRemove"
-                    :limit="1" :file-list="fileList" :auto-upload="true" list-type="picture-card"
+                    :limit="1" :file-list="fileList2" :auto-upload="true" list-type="picture-card"
                     :http-request="customUploadRequest">
                     <el-icon>
                       <Plus />
@@ -183,8 +182,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
-import { fetchTagsOptionsApi, fetchUserCategoriesApi, submitBlogApi } from '../../api/blogApi'
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
+import { fetchTagsOptionsApi, fetchUserCategoriesApi, submitBlogApi, fetchBlogLikeAndCollectionApi, updateBlogApi } from '../../api/blogApi'
 import { createUserCategoryApi, fetchSysCategoryApi } from '../../api/categoryApi'
 import { deleteFileApi } from '../../api/fileApi'
 import { createSubjectApi, fetchUserSubjectApi } from '../../api/subjectApi'
@@ -194,22 +193,27 @@ import { editorRef, toolbarConfig, editorConfig, mode, handleCreated, imgUidList
 import axios from 'axios';
 import { ElMessage, genFileId } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
+import { useRoute, useRouter } from 'vue-router';
+const router = useRouter();
+const route = useRoute();
 
+// 判断是新建还是编辑模式
+const isEditMode = ref(false);
+const blogId = ref(null);
 
-
-const uploadPath = import.meta.env.VITE_FILE_UPLOAD_URL;
 
 // 博客对象
 const blogData = ref({
-  title: '第一篇博客', // 博客标题
-  introduction: '第一篇博客的简介', // 博客简介
-  content: '第一篇博客的内容', // 博客内容
+  uid: '',
+  title: '', // 博客标题
+  introduction: '', // 博客简介
+  content: '', // 博客内容
   commentsAllowed: true, // 是否允许评论
   coverImageUid: null, // 封面图片的 UID
   isOriginal: false, // 是否原创
-  originalUrl: 'http://localhost', // 原创地址
-  tags: '', // 博客标签
-  visibilityScope: '1',// 可见范围
+  originalUrl: '', // 原创地址
+  tags: [], // 博客标签
+  visibilityScope: "1",// 可见范围
   category: '', // 博客分类
   subject: '', // 博客专题
 
@@ -217,8 +221,16 @@ const blogData = ref({
 // 封面对象
 const upload = ref()
 const fileList = ref([])
+const fileList2 = ref([])
 const uploadedFiles = ref([])
 const coverImageUuid = ref(null)
+
+const ContentProps = defineProps({
+  id: {
+    type: String,
+    required: true
+  }
+})
 
 const newArray = ref([])
 // 标签对象
@@ -274,20 +286,18 @@ const validateBlogData = () => {
   }
 };
 
+// 提交博客
 const publishBlog = async () => {
   try {
     validateBlogData();
-    await submitBlog(); // 修正了这里缺少 await 的问题
-
+    if (isEditMode.value) {
+      await updateBlog();
+    } else {
+      await submitBlog();
+    }
   } catch (error) {
-    ElMessage({
-      showClose: true,
-      message: error.message,
-      type: 'error',
-    });
-
+    ElMessage.error(error.message);
   }
-
 };
 
 // 获取标签列表
@@ -305,6 +315,7 @@ const fetchCategories = async () => {
   try {
     const response = await fetchUserCategoriesApi();
     categoryOptions.value = response.data;
+    console.log('分组标签', categoryOptions.value)
   } catch (error) {
     console.error('获取用户分组数据失败:', error);
   }
@@ -318,7 +329,72 @@ const fetchConfigCategory = async () => {
     console.error('获取系统分组数据失败:', error);
   }
 };
-onMounted(() => {
+// 加载已有博客数据
+const loadBlogData = async (id) => {
+  try {
+    const request = {
+      uid: id
+    };
+    
+    const response = await fetchBlogLikeAndCollectionApi(request);
+    const data = response.data;
+    const blog = data.blogVO;
+    const tag = data.tags;
+    const category = data.userCategory;
+    blogData.value = {
+      uid: blog.uid,
+      title: blog.title,
+      introduction: blog.introduction,
+      content: blog.content,
+      commentsAllowed: blog.commentsAllowed,
+      coverImageUid: blog.coverImageUid,
+      isOriginal: blog.isOriginal,
+      originalUrl: blog.originalUrl,
+      tags: tag.map(t => t.uid),
+      category: category.uid,
+      subject: blog.subject,
+      visibilityScope: blog.visibilityScope
+    };
+    if (blogData.value.commentsAllowed === 1) {
+      blogData.value.commentsAllowed = true
+    }
+    else {
+      blogData.value.commentsAllowed = false
+    }
+    if (blogData.value.subject) {
+      subjectVisibility.value = true
+    }
+    console.log(blogData.value.visibilityScope)
+    fileList.value = blog.coverImageUid ? [{ url: blog.coverImageUrl }] : [];
+  } catch (error) {
+    ElMessage.error('加载博客数据失败');
+    console.error(error);
+  }
+};
+// 更新博客
+const updateBlog = async () => {
+  try {
+    blogData.value.commentsAllowed = blogData.value.commentsAllowed ? 1 : 0;
+
+    const response = await updateBlogApi(blogData.value);
+    if (response.code === 200) {
+      ElMessage.success('博客更新成功');
+      router.push({ name: 'ContentManagement' }); // 跳转到博客列表页
+    } else {
+      ElMessage.error('博客更新失败');
+    }
+  } catch (error) {
+    ElMessage.error('博客更新失败');
+    console.error(error);
+  }
+};
+onMounted(async () => {
+  console.log('id:', ContentProps.id)
+  if (ContentProps.id) {
+    isEditMode.value = true;
+    blogId.value = ContentProps.id;
+    await loadBlogData(blogId.value);
+  }
   fetchOptions();
   fetchCategories();
   fetchSubjectList();
@@ -401,12 +477,14 @@ const submitBlog = async () => {
   blogData.value.tags = blogData.value.tags.filter(sublist => sublist.length > 0) // 过滤空列表
     .map(sublist => sublist[sublist.length - 1]); // 获取每个子列表的末尾元素
 
-
+  blogData.value.commentsAllowed = blogData.value.commentsAllowed ? 1 : 0;
   // 直接使用 blogData.value 的值
   const requestData = {
     blogVO: { ...blogData.value }, // 使用解构赋值将响应式对象转换为普通对象
     uuidsToDelete: uuidsToDelete
   };
+
+
 
   // 发送封面图片 UUID 和要删除的图片 UUID 到后端
   try {
@@ -544,6 +622,16 @@ const fetchSubjectList = async () => {
     console.error('获取专题列表失败:', response.message);
   }
 };
+
+// 监听 blogData.tags 的变化
+watch(
+  () => blogData.value.tags, // 监听 blogData.tags
+  (newTags, oldTags) => {
+    console.log('标签变化:', newTags);
+    // 在这里可以执行其他逻辑
+  },
+  { deep: true } // 深度监听，确保嵌套对象或数组的变化也能被捕获
+);
 </script>
 
 

@@ -35,4 +35,10 @@ public interface IUserCategoryService extends IService<UserCategory> {
     CommonResponse updateBlogCategory(String oldUid, String newUid, String blogUid);
 
     CommonResponse deleteBlogCategory(String uid);
+
+    CommonResponse getUserCollection(String uid);
+
+    CommonResponse updateBlogCollection(UserCategoryVO categoryVO);
+
+    CommonResponse deleteBlogCollectionCategory(String uid);
 }

@@ -57,7 +57,7 @@ public class MyUserDetailsService implements UserDetailsService {
         if (user.getAvatarUid() != null) {
             Mono<CommonResponse> fileUrl = fileFeignClient.getFileUrlById(user.getAvatarUid());
             CommonResponse response = fileUrl.block();
-            myuser.setAvatarUid(Optional.ofNullable(response)
+            myuser.setAvatarUrl(Optional.ofNullable(response)
                     .map(CommonResponse::getData)
                     .map(Object::toString)
                     .orElse(null));

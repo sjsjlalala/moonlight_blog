@@ -28,7 +28,7 @@ import reactor.core.publisher.Mono;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 /**
  * <p>
@@ -59,6 +59,13 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
     @Autowired
     private BlogSubjectMapper blogSubjectMapper;
     @Autowired
+    private BlogCommentsMapper blogCommentsMapper;
+    @Autowired
+    private UserBlogLikeMapper userBlogLikeMapper;
+    @Autowired
+    private CommentMapper commentMapper;
+
+    @Autowired
     private RedisUtils redisUtil;
 
 
@@ -77,13 +84,14 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
         // 用户信息
         User userInfo = UserContext.getUser();
         blog.setAuthorUid(userInfo.getUid());
+        blog.setUid(null);
 
         // 添加博客
         if (!blog.insert()) {
             throw new RuntimeException("添加博客失败");
         }
         // 将博客挂载到标签下,保存到数据库
-        dealTags(blog, request);
+        dealTags(blog, request.getBlogVO());
 
         // 将博客挂载到用户分组，保存到数据库
         dealCategory(blog, request);
@@ -118,14 +126,14 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
         BlogUserCategorys blogUserCategorys = new BlogUserCategorys();
         blogUserCategorys.setBlogUid(blog.getUid());
         // 只取分组的链尾
-        List<String> category = request.getBlogVO().getCategory();
-        blogUserCategorys.setUserCategoryUid(category.get(category.size() - 1));
+        String category = request.getBlogVO().getCategory();
+        blogUserCategorys.setUserCategoryUid(category);
         // 保存到数据库
         blogUserCategorysMapper.insert(blogUserCategorys);
     }
 
-    private void dealTags(Blog blog, BlogRequestVO request) {
-        List<String> tagsChain = request.getBlogVO().getTags();
+    private void dealTags(Blog blog, BlogVO blogVO) {
+        List<String> tagsChain = blogVO.getTags();
         for (String tag : tagsChain) {
             BlogTags blogTag = new BlogTags();
             blogTag.setBlogUid(blog.getUid());
@@ -151,66 +159,43 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
         // 分页获取博客列表
         LambdaQueryWrapper<Blog> queryWrapper = new LambdaQueryWrapper<Blog>()
                 .eq(Blog::getStatus, EStatus.VALID);
-
         if (requestBlogVO.getKeyword() != null && !requestBlogVO.getKeyword().isEmpty()) {
             queryWrapper.and(wrapper -> wrapper
                     .like(Blog::getTitle, requestBlogVO.getKeyword())
                     .or()
                     .like(Blog::getIntroduction, requestBlogVO.getKeyword()));
         }
+        if (requestBlogVO.getAuthorUid() != null && !requestBlogVO.getAuthorUid().isEmpty())
+            queryWrapper.eq(Blog::getAuthorUid, requestBlogVO.getAuthorUid());
 
 
         Page<Blog> page = blogMapper.selectPage(new Page<>(currentPage, pageSize), queryWrapper);
-        List<Blog> blogs = page.getRecords();
-
-        // 组装结果
+        List<String> uids = page.getRecords().stream().map(Blog::getUid).toList();
         List<BlogDetailVO> res = new ArrayList<>();
-        for (Blog blog : blogs) {
-            BlogVO blogVO = new BlogVO();
-            BeanUtil.copyProperties(blog, blogVO);
-            // 获取博客-标签列表
-            List<BlogTags> blogTagsByBlogUid = blogTagsMapper.selectList(new LambdaQueryWrapper<BlogTags>().eq(BlogTags::getStatus, EStatus.VALID).eq(BlogTags::getBlogUid, blog.getUid()));
-
-            // 获取标签列表
-            List<String> tags = blogTagsByBlogUid.stream().map(BlogTags::getTagUid).toList();
-            blogVO.setTags(tags);
-
-            // 获取封面图片url
-            if (blog.getCoverImageUid() != null) {
-                Mono<CommonResponse> coverImgUrl = fileFeignClient.getFileUrlById(blog.getCoverImageUid());
-                String url = Objects.requireNonNull(coverImgUrl.block()).getData().toString();
-                blogVO.setCoverImageUid(url);
-            }
-
-            // 从缓存中获取点赞数量和点赞状态 (若用户已经登录）
-            if (UserContext.getUser() != null) {
-                String statusPrefix = SysConfig.BLOG_TOGGLE_LIKE_PREFIX + blog.getUid() + SysConfig.STATUS;
-                Integer likes = redisUtil.get(statusPrefix, Integer.class);
-                if (likes != null) {
-                    blogVO.setLikes(likes);
-                }
-                if (redisUtil.hasKey(SysConfig.BLOG_TOGGLE_LIKE_PREFIX + blog.getUid() + SysConfig.USER + UserContext.getUser().getUid())) {
-                    blogVO.setIsLiked(true);
-                }
-            }
-
-
-            // 获取作者信息
-            String authorUid = blog.getAuthorUid();
-            User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUid, UUIDUtil.uuidToBytes(authorUid)));
-            UserVO userVO = new UserVO();
-            BeanUtil.copyProperties(user, userVO);
-
-            // 组装最终结果视图
-            BlogDetailVO blogDetailVO = new BlogDetailVO();
-            blogDetailVO.setBlogVO(blogVO);
-            blogDetailVO.setUserVO(userVO);
-            res.add(blogDetailVO);
+        for (String uid : uids) {
+            CommonResponse<BlogDetailVO> blogDetailVOCommonResponse = blogDetailByUid(uid);
+            res.add(blogDetailVOCommonResponse.getData());
         }
 
-        // 返回包含分页信息的响应
+
         return CommonResponse.success(res, currentPage, pageSize, page.getTotal(), (int) Math.ceil((double) page.getTotal() / pageSize));
 
+    }
+
+    @Override
+    public CommonResponse<BlogDetailVO> blogDetail(BlogVO blogVO) {
+        CommonResponse<BlogDetailVO> res = blogDetailByUid(blogVO.getUid());
+        BlogDetailVO data = res.getData();
+
+        // 更新击数
+        if (blogVO.getIsDetailRequest() != null && blogVO.getIsDetailRequest()) {
+            Blog blog = blogMapper.selectOne(new LambdaQueryWrapper<Blog>().eq(Blog::getUid, UUIDUtil.uuidToBytes(blogVO.getUid())));
+            blog.setClicks(blogVO.getClicks() + 1);
+            data.getBlogVO().setClicks(blog.getClicks());
+            blogMapper.update(blog, new LambdaQueryWrapper<Blog>().eq(Blog::getUid, UUIDUtil.uuidToBytes(blog.getUid())));
+        }
+
+        return CommonResponse.success(data);
     }
 
     /**
@@ -222,6 +207,7 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
      **/
     @Override
     public CommonResponse<BlogDetailVO> blogDetailByUid(String uid) {
+
         BlogDetailVO blogDetailVO = new BlogDetailVO();
         BlogVO blogVO = new BlogVO();
         UserVO userVO = new UserVO();
@@ -239,6 +225,7 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
             throw new RuntimeException("博客不存在");
         }
         BeanUtils.copyProperties(blog, blogVO);
+        blogVO.setVisibilityScope(String.valueOf(blog.getVisibilityScope()));
         // 获取博客-标签列表
         List<BlogTags> blogTags = blogTagsMapper.selectList(new LambdaQueryWrapper<BlogTags>().eq(BlogTags::getStatus, EStatus.VALID).eq(BlogTags::getBlogUid, UUIDUtil.uuidToBytes(blog.getUid())));
         // 获取标签列表
@@ -253,7 +240,7 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
         if (blog.getCoverImageUid() != null) {
             Mono<CommonResponse> coverImgUrl = fileFeignClient.getFileUrlById(blog.getCoverImageUid());
             String url = Objects.requireNonNull(coverImgUrl.block()).getData().toString();
-            blogVO.setCoverImageUid(url);
+            blogVO.setCoverImageUrl(url);
         }
 
 
@@ -267,6 +254,13 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
         String authorUid = blog.getAuthorUid();
         User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUid, UUIDUtil.uuidToBytes(authorUid)));
 
+        // 专题信息
+        BlogSubject blogSubject = blogSubjectMapper.selectOne(new LambdaQueryWrapper<BlogSubject>().eq(BlogSubject::getBlogUid, UUIDUtil.uuidToBytes(blog.getUid())).eq(BlogSubject::getStatus, EStatus.VALID));
+        if (blogSubject != null) {
+            blogVO.setSubject(blogSubject.getSubjectUid());
+        }
+
+
         // 获取用户对此博客的收藏情况（如果用户已经登录）
         if (userInfo != null) {
             List<UserBlogFavorites> userBlogFavorites = userBlogFavoritesMapper.selectList(new LambdaQueryWrapper<UserBlogFavorites>()
@@ -278,11 +272,13 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
             }
 
             // 从缓存中获取点赞数量和点赞状态
-
             String statusPrefix = SysConfig.BLOG_TOGGLE_LIKE_PREFIX + blog.getUid() + SysConfig.STATUS;
             Integer likes = redisUtil.get(statusPrefix, Integer.class);
             if (likes != null) {
                 blogVO.setLikes(likes);
+            }
+            else {
+
             }
             if (redisUtil.hasKey(SysConfig.BLOG_TOGGLE_LIKE_PREFIX + blog.getUid() + SysConfig.USER + UserContext.getUser().getUid())) {
                 blogVO.setIsLiked(true);
@@ -290,9 +286,10 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
         }
 
 
-
-
         BeanUtil.copyProperties(user, userVO);
+        // 处理用户信息
+        assembleUserVO(userVO);
+
         // 组装最终结果视图
         blogDetailVO.setBlogVO(blogVO);
         blogDetailVO.setUserVO(userVO);
@@ -302,6 +299,45 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
 
         return CommonResponse.success(blogDetailVO);
     }
+
+    private void assembleUserVO(UserVO userVO) {
+        // 获取用户头像
+        if (userVO.getAvatarUid() != null) {
+            Mono<CommonResponse> fileUrl = fileFeignClient.getFileUrlById(userVO.getAvatarUid());
+            CommonResponse response = fileUrl.block();
+            userVO.setAvatarUrl(Optional.ofNullable(response)
+                    .map(CommonResponse::getData)
+                    .map(Object::toString)
+                    .orElse(null));
+        }
+        // 获取用户其他信息
+        List<Blog> blogs = blogMapper.selectList(new LambdaQueryWrapper<Blog>().eq(Blog::getAuthorUid, UUIDUtil.uuidToBytes(userVO.getUid())).eq(Blog::getStatus, EStatus.VALID));
+
+        // 1.获取博客数量
+        userVO.setBlogCount(blogs.size());
+
+        // 2.获取访问数量
+        userVO.setVisitCount(blogs.stream().mapToInt(Blog::getClicks).sum());
+
+        // 3.获取被评论数量
+        blogs.forEach(blog -> {
+            Integer i = commentMapper.selectCount(new LambdaQueryWrapper<Comment>().eq(Comment::getBlogUid, UUIDUtil.uuidToBytes(blog.getUid())).eq(Comment::getStatus, EStatus.VALID));
+            userVO.setCommentCount(i + userVO.getCommentCount());
+        });
+        // 4.获取点赞数量
+        blogs.forEach(blog -> {
+            // 从缓存中获取点赞数量和点赞状态
+            userVO.setLikes(userVO.getLikes() + blog.getLikes());
+        });
+        // 5.获取收藏数量
+        blogs.forEach(blog -> {
+            Integer i = userBlogFavoritesMapper.selectCount(new LambdaQueryWrapper<UserBlogFavorites>().eq(UserBlogFavorites::getBlogUid, UUIDUtil.uuidToBytes(blog.getUid())).eq(UserBlogFavorites::getStatus, EStatus.VALID));
+            userVO.setFavorites(i + userVO.getFavorites());
+        });
+        // 5.获取关注数量
+
+    }
+
     /**
      * @description: 博客点赞/取消点赞，用redis存储点赞数据，定时任务持久化到数据库
      * @author: moki
@@ -336,8 +372,7 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
             // 缓存已经失效
             // 更新数据库
             Blog target = this.baseMapper.selectOne(new LambdaQueryWrapper<Blog>().eq(Blog::getUid, UUIDUtil.uuidToBytes(blogVO.getUid())).eq(Blog::getStatus, EStatus.VALID));
-            // 博客不存在
-            if (target == null) {
+              if (target == null) {
                 return CommonResponse.failure(ErrorCode.BLOG_NOT_EXIST.getCode(), ErrorCode.BLOG_NOT_EXIST.getMessage());
             }
             target.setLikes(blogVO.getLikes());
@@ -349,6 +384,7 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
         redisUtil.set(statusPrefix, blogVO.getLikes(), SysConfig.TOGGLE_LIKE_EXPIRE_TIME);
         return CommonResponse.success(Messages.TOGGLE_LIKE_SUCCESS);
     }
+
     /**
      * @description: 博客收藏/取消收藏
      * @author: moki
@@ -365,7 +401,7 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
                 // 已经收藏
                 return CommonResponse.failure(ErrorCode.BLOG_ALREADY_COLLECTED.getCode(), ErrorCode.BLOG_ALREADY_COLLECTED.getMessage());
             } else {
-               // 收藏
+                // 收藏
                 UserBlogFavorites userBlogFavorites = new UserBlogFavorites();
                 userBlogFavorites.setUserUid(userInfo.getUid());
                 userBlogFavorites.setBlogUid(blogVO.getUid());
@@ -374,6 +410,7 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
 
         return null;
     }
+
     /**
      * @description: 根据标签uid获取博客列表
      * @author: moki
@@ -382,31 +419,52 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
      * @return: org.example.base.response.CommonResponse<java.util.List < com.example.blog_web.vo.BlogVO>>
      **/
     @Override
-    public CommonResponse<List<BlogVO>> fetchBlogListByTag(String tagUid) {
-        List<BlogVO> blogVOS = new ArrayList<>();
+    public CommonResponse fetchBlogListByTag(String tagUid) {
+        List<BlogDetailVO> res = new ArrayList<>();
         // 判断该标签是否有子标签
         List<Tag> childTags = tagMapper.selectList(new LambdaQueryWrapper<Tag>().eq(Tag::getParentUid, UUIDUtil.uuidToBytes(tagUid)).eq(Tag::getStatus, EStatus.VALID));
         if (!childTags.isEmpty()) {
             // 有子标签
-            for (Tag childTag : childTags) {
+            // 根据博客id去重
+            List<String> childTaguids = childTags.stream().map(Tag::getUid).distinct().toList();
+            for (String childTaguid : childTaguids) {
                 // 获取子标签下的博客
-                List<BlogTags> blogTags = blogTagsMapper.selectList(new LambdaQueryWrapper<BlogTags>().eq(BlogTags::getTagUid, UUIDUtil.uuidToBytes(childTag.getUid())).eq(BlogTags::getStatus, EStatus.VALID));
-                for (BlogTags blogTag : blogTags) {
-                    List<Blog> blogs = blogMapper.selectList(new LambdaQueryWrapper<Blog>().eq(Blog::getUid, UUIDUtil.uuidToBytes(blogTag.getBlogUid())).eq(Blog::getStatus, EStatus.VALID));
-                    blogVOS.addAll(BeanUtil.copyToList(blogs, BlogVO.class));
+                List<BlogTags> blogTags = blogTagsMapper.selectList(new LambdaQueryWrapper<BlogTags>().eq(BlogTags::getTagUid, UUIDUtil.uuidToBytes(childTaguid)).eq(BlogTags::getStatus, EStatus.VALID));
+                // 根据博客id去重
+                List<String> uids = blogTags.stream().map(BlogTags::getBlogUid).distinct().toList();
+                for (String uid : uids) {
+                    CommonResponse<BlogDetailVO> blogDetailVOCommonResponse = blogDetailByUid(uid);
+                    res.add(blogDetailVOCommonResponse.getData());
                 }
             }
         } else {
             // 无子标签,本身就是子标签
             List<BlogTags> blogTags = blogTagsMapper.selectList(new LambdaQueryWrapper<BlogTags>().eq(BlogTags::getTagUid, UUIDUtil.uuidToBytes(tagUid)).eq(BlogTags::getStatus, EStatus.VALID));
             for (BlogTags blogTag : blogTags) {
-                List<Blog> blogs = blogMapper.selectList(new LambdaQueryWrapper<Blog>().eq(Blog::getUid, UUIDUtil.uuidToBytes(blogTag.getBlogUid())).eq(Blog::getStatus, EStatus.VALID));
-                blogVOS.addAll(BeanUtil.copyToList(blogs, BlogVO.class));
+                CommonResponse<BlogDetailVO> blogDetailVOCommonResponse = blogDetailByUid(blogTag.getBlogUid());
+                res.add(blogDetailVOCommonResponse.getData());
             }
         }
-        // 去重
-        blogVOS = blogVOS.stream().distinct().collect(Collectors.toList());
-        return CommonResponse.success(blogVOS);
+
+
+        return CommonResponse.success(deduplicate(res));
+    }
+
+    public static List<BlogDetailVO> deduplicate(List<BlogDetailVO> blogDetailVOList) {
+        List<BlogDetailVO> result = new ArrayList<>();
+        for (BlogDetailVO blogDetailVO : blogDetailVOList) {
+            boolean isDuplicate = false;
+            for (BlogDetailVO existingVO : result) {
+                if (existingVO.getBlogVO().getUid().equals(blogDetailVO.getBlogVO().getUid())) {
+                    isDuplicate = true;
+                    break;
+                }
+            }
+            if (!isDuplicate) {
+                result.add(blogDetailVO);
+            }
+        }
+        return result;
     }
 
     @Override
@@ -419,7 +477,91 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
     }
 
     @Override
-    public CommonResponse getBlogLikeAndCollection(String uid) {
-        return blogDetailByUid(uid);
+    public CommonResponse getBlogLikeAndCollection(BlogVO blogVO) {
+        return blogDetail(blogVO);
     }
+
+    @Override
+    public CommonResponse updateBlogById(BlogVO blogVO) {
+        // 1. 先获取原博客
+        Blog blog = blogMapper.selectOne(new LambdaQueryWrapper<Blog>().eq(Blog::getUid, UUIDUtil.uuidToBytes(blogVO.getUid())).eq(Blog::getStatus, EStatus.VALID));
+
+        // 2. 更改与blog关联的表
+        // 2.1 更改标签
+        blogTagsMapper.delete(new LambdaQueryWrapper<BlogTags>().eq(BlogTags::getBlogUid, UUIDUtil.uuidToBytes(blogVO.getUid())));
+        dealTags(blog, blogVO);
+
+        // 2.2 更改分类
+        BlogUserCategorys blogUserCategorys = blogUserCategorysMapper.selectOne(new LambdaQueryWrapper<BlogUserCategorys>().eq(BlogUserCategorys::getBlogUid, UUIDUtil.uuidToBytes(blogVO.getUid())));
+        if (!blogUserCategorys.getUserCategoryUid().equals(blogVO.getCategory())) {
+            blogUserCategorys.setUserCategoryUid(blogVO.getCategory());
+            blogUserCategorysMapper.update(blogUserCategorys, new LambdaQueryWrapper<BlogUserCategorys>().eq(BlogUserCategorys::getUid, UUIDUtil.uuidToBytes(blogUserCategorys.getUid())));
+        }
+
+        // 2.3 更改专题
+        BlogSubject blogSubject = blogSubjectMapper.selectOne(new LambdaQueryWrapper<BlogSubject>().eq(BlogSubject::getBlogUid, UUIDUtil.uuidToBytes(blogVO.getUid())));
+        if (!blogSubject.getSubjectUid().equals(blogVO.getSubject())) {
+            blogSubject.setSubjectUid(blogVO.getSubject());
+            blogSubjectMapper.update(blogSubject, new LambdaQueryWrapper<BlogSubject>().eq(BlogSubject::getUid, UUIDUtil.uuidToBytes(blogSubject.getUid())));
+        }
+
+        // 3. 更改封面
+        if (!blogVO.getCoverImageUid().equals(blog.getCoverImageUid())) {
+            ArrayList<String> fileUuids = new ArrayList<>();
+            fileUuids.add(blog.getCoverImageUid());
+            fileFeignClient.deleteFile(fileUuids);
+
+        }
+        BeanUtil.copyProperties(blogVO, blog);
+        // 用户信息
+        User userInfo = UserContext.getUser();
+        blog.setAuthorUid(userInfo.getUid());
+        blogMapper.update(blog, new LambdaQueryWrapper<Blog>().eq(Blog::getUid, UUIDUtil.uuidToBytes(blogVO.getUid())));
+
+        return CommonResponse.success(Messages.UPDATE_SUCCESS);
+    }
+
+    @Override
+    public CommonResponse deleteBlogById(String id) {
+        Blog blog = blogMapper.selectOne(new LambdaQueryWrapper<Blog>().eq(Blog::getUid, UUIDUtil.uuidToBytes(id)));
+        blog.setStatus(EStatus.INVALID);
+        blogMapper.update(blog, new LambdaQueryWrapper<Blog>().eq(Blog::getUid, UUIDUtil.uuidToBytes(id)));
+
+        // 同时删除与blog相关的表
+        List<BlogTags> blogTags = blogTagsMapper.selectList(new LambdaQueryWrapper<BlogTags>().eq(BlogTags::getBlogUid, UUIDUtil.uuidToBytes(id)));
+        if (blogTags != null && !blogTags.isEmpty()) {
+            for (BlogTags blogTag : blogTags) {
+                blogTag.setStatus(EStatus.INVALID);
+                blogTagsMapper.update(blogTag, new LambdaQueryWrapper<BlogTags>().eq(BlogTags::getUid, UUIDUtil.uuidToBytes(blogTag.getUid())));
+            }
+
+        }
+        List<BlogUserCategorys> blogUserCategorys = blogUserCategorysMapper.selectList(new LambdaQueryWrapper<BlogUserCategorys>().eq(BlogUserCategorys::getBlogUid, UUIDUtil.uuidToBytes(id)));
+        if (blogUserCategorys != null && !blogUserCategorys.isEmpty()) {
+            for (BlogUserCategorys blogUserCategory : blogUserCategorys) {
+                blogUserCategory.setStatus(EStatus.INVALID);
+                blogUserCategorysMapper.update(blogUserCategory, new LambdaQueryWrapper<BlogUserCategorys>().eq(BlogUserCategorys::getUid, UUIDUtil.uuidToBytes(blogUserCategory.getUid())));
+            }
+        }
+        List<BlogSubject> blogSubjects = blogSubjectMapper.selectList(new LambdaQueryWrapper<BlogSubject>().eq(BlogSubject::getBlogUid, UUIDUtil.uuidToBytes(id)));
+        if (blogSubjects != null && !blogSubjects.isEmpty()) {
+            for (BlogSubject blogSubject : blogSubjects) {
+                blogSubject.setStatus(EStatus.INVALID);
+                blogSubjectMapper.update(blogSubject, new LambdaQueryWrapper<BlogSubject>().eq(BlogSubject::getUid, UUIDUtil.uuidToBytes(blogSubject.getUid())));
+            }
+        }
+
+        return CommonResponse.success(Messages.DELETE_SUCCESS);
+    }
+
+    @Override
+    public CommonResponse getUserHomePage(String uid) {
+        User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUid, UUIDUtil.uuidToBytes(uid)));
+        UserVO userVO = new UserVO();
+        BeanUtils.copyProperties(user, userVO);
+        assembleUserVO(userVO);
+        return CommonResponse.success(userVO);
+    }
+
+
 }
