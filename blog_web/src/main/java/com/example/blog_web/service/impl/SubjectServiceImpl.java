@@ -91,11 +91,11 @@ public class SubjectServiceImpl extends ServiceImpl<SubjectMapper, Subject> impl
      * @return: org.example.base.response.CommonResponse<java.util.List < com.example.blog_web.vo.SubjectDetailVO>>
      **/
     @Override
-    public CommonResponse<List<SubjectDetailVO>> fetchSubjectDetail(SubjectDetailVO subjectDetailVO) {
+    public CommonResponse<List<SubjectDetailVO>> fetchSubjectDetail(SubjectVO requestVO) {
         List<SubjectDetailVO> res = new ArrayList<>();
         // 设置默认值
-        String keyword = subjectDetailVO.getKeyword() != null ? subjectDetailVO.getKeyword() : "";
-        String filterWord = subjectDetailVO.getFilterWord() != null ? subjectDetailVO.getFilterWord() : "";
+        String keyword = requestVO.getKeyword() != null ? requestVO.getKeyword() : "";
+        String filterWord = requestVO.getFilterWord() != null ? requestVO.getFilterWord() : "";
 
         // 分页查找,根据关键字查找
         LambdaQueryWrapper<Subject> queryWrapper = new LambdaQueryWrapper<Subject>()
@@ -105,8 +105,8 @@ public class SubjectServiceImpl extends ServiceImpl<SubjectMapper, Subject> impl
         if (!filterWord.isEmpty()) {
             queryWrapper.eq(Subject::getCategoryUid, UUIDUtil.uuidToBytes(filterWord));
         }
-        if (subjectDetailVO.getUser() != null ) {
-            queryWrapper.eq(Subject::getUserUid, UUIDUtil.uuidToBytes(subjectDetailVO.getUser().getUid()));
+        if (requestVO.getUid() != null && !requestVO.getUid().isEmpty()) {
+            queryWrapper.eq(Subject::getUid, UUIDUtil.uuidToBytes((requestVO.getUid())));
         }
 
         List<Subject> subjects = this.baseMapper.selectList(queryWrapper);

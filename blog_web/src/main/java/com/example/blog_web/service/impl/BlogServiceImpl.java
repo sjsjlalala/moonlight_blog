@@ -166,7 +166,7 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
                     .like(Blog::getIntroduction, requestBlogVO.getKeyword()));
         }
         if (requestBlogVO.getAuthorUid() != null && !requestBlogVO.getAuthorUid().isEmpty())
-            queryWrapper.eq(Blog::getAuthorUid, requestBlogVO.getAuthorUid());
+            queryWrapper.eq(Blog::getAuthorUid, UUIDUtil.uuidToBytes(requestBlogVO.getAuthorUid()));
 
 
         Page<Blog> page = blogMapper.selectPage(new Page<>(currentPage, pageSize), queryWrapper);

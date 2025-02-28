@@ -23,7 +23,7 @@ public interface ISubjectService extends IService<Subject> {
 
     CommonResponse<List<OptionVO>> fetchUserSubject();
 
-    CommonResponse<List<SubjectDetailVO>> fetchSubjectDetail(SubjectDetailVO subjectDetailVO);
+    CommonResponse<List<SubjectDetailVO>> fetchSubjectDetail(SubjectVO subjectDetailVO);
 
     CommonResponse updateSubject(SubjectVO subjectVO);
 

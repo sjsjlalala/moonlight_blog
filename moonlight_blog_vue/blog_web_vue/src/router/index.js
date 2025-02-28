@@ -17,6 +17,9 @@ import CommentManagement from '@/components/comment/CommentManagement.vue'
 import CollectionManagement from '@/components/collection/CollectionManagement.vue'
 import AuthorInfo from '@/components/user/AuthorInfo.vue'
 import AuthorDetail from '@/components/user/AuthorDetail.vue'
+import FollowContent from '@/components/follow/FollowContent.vue'
+import FollowList from '@/components/follow/FollowList.vue'
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -113,8 +116,18 @@ const router = createRouter({
       component: AuthorDetail,
       props: true
     },
-    
-    
+    {
+      path: '/followContent/:uid?',
+      name: 'FollowContent',
+      component: FollowContent,
+      props: true
+    },
+    {
+      path: '/followList/:uid?',
+      name: 'FollowList',
+      component: FollowList,
+      props: true
+    },
     
     
   ],

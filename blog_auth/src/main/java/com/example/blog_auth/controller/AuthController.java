@@ -167,10 +167,10 @@ public class AuthController {
             return CommonResponse.failure(ErrorCode.CODE_ERROR.getCode(), ErrorCode.CODE_ERROR.getMessage(), null);
         }
         // 判断账号是否已经存在
-        User user1 = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getEmail, user.getEmail()));
-        if (user1 != null) {
-            return CommonResponse.failure(ErrorCode.USER_ALREADY_EXISTS.getCode(), ErrorCode.USER_ALREADY_EXISTS.getMessage(), null);
-        }
+//        User user1 = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getEmail, user.getEmail()));
+//        if (user1 != null) {
+//            return CommonResponse.failure(ErrorCode.USER_ALREADY_EXISTS.getCode(), ErrorCode.USER_ALREADY_EXISTS.getMessage(), null);
+//        }
         User newUser = new User();
         BeanUtil.copyProperties(user, newUser);
         //  密码加密
